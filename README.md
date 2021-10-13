@@ -1,4 +1,26 @@
-# WaveGuard Defense
+# New README
+
+Use python `3.6`
+
+~~For windows you need to install vs standalone compiler. Details in [here](https://pypi.org/project/lws/).~~
+
+You need sox for pysndfx. And sox doesn't support windows therefore can't run natively on windows.
+
+You can't run this on windows.
+
+Also `pip install numba==0.48`
+
+And `pip install pysndfx==0.3.6`
+
+To run the code:
+`python Defender/defender_multiple.py --in_dir example_audios --out_base output_audios --defender_type mel_heuristic --defender_hp 80`
+
+example_audios downloaded from the [Audio Examples](https://waveguard.herokuapp.com/) page.
+
+Choose `defender_hp=80` since this is the choice from the paper.
+
+
+# Old README
 
 Code for our USENIX 21 paper [WaveGuard: Understanding and Mitigating Audio Adversarial Examples
 ](https://www.usenix.org/system/files/sec21fall-hussain.pdf).
