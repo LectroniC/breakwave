@@ -76,6 +76,10 @@ def transcribe_deepspeech(audio_dir, restore_path):
         
           with tf.variable_scope("", reuse=True):
             logits = get_logits(new_input, lengths, reuse=True)
+          #tf.get_variable_scope().reuse_variables()
+          #logits = get_logits(new_input, lengths)
+          #with tf.variable_scope(tf.get_variable_scope(),reuse=False):
+          #    pass
 
           decoded_audio, _ = tf.nn.ctc_beam_search_decoder(logits, lengths, merge_repeated=False, beam_width=500)
         
