@@ -76,6 +76,8 @@ def save_as_wav(fp, fs, x):
     fs: Waveform sample rate.
     x: Waveform (must be 32-bit float nd-array of size [?, 1, 1])
   """
+  print("Saving audios")
+  print(x.shape)
   try:
     nsamps, nfeats, nch = x.shape
   except ValueError:
