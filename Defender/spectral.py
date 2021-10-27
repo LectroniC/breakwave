@@ -485,10 +485,15 @@ def waveform_to_mel_to_waveform_tf(x,
       X_complex = tf.cast(tf.abs(X_mag_i),  dtype=tf.complex64)
       x_gl = istft_tf(X_complex, nfft, nhop)
       for i in range(ngl):
+          # Here we use angle function to get the phase info of a complex number.
+          # Alternatively we can use X_complex/abs(X_complex) to get the phase info.
+          # As in https://github.com/candlewill/Griffin_lim/tree/master
+          # Explantion of Griffin-Lim:
+          # https://www.quora.com/What-are-intuitive-explanations-of-the-Griffin-Lim-Algorithm
           imaginary_unit = tf.cast(1j, tf.complex64)
-          clean_angles = tf.cast(tf.angle(stft_tf(x_gl, nfft, nhop, pad_end=False)), tf.complex64) * imaginary_unit
-          angles = tf.math.exp(clean_angles)
-          reconst = X_complex * angles
+          exp_num = tf.cast(tf.angle(stft_tf(x_gl, nfft, nhop, pad_end=False)), tf.complex64) * imaginary_unit
+          phase = tf.math.exp(exp_num)
+          reconst = X_complex * phase
           x_gl = istft_tf(reconst, nfft, nhop)
       x_gl = tf.cast(x_gl, tf.float32)
       return x_gl
