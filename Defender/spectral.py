@@ -482,8 +482,7 @@ def waveform_to_mel_to_waveform_tf(x,
       if nch != 1:
         raise NotImplementedError('Can only invert monaural signals')
       
-      # TODO: Fix here with a differentiable version
-      X_mag_i = X_mag[:, :, :, 0]
+      X_mag_i = X_mag[:, :, :, :]
       X_complex = tf.cast(tf.abs(X_mag_i),  dtype=tf.complex128)
       x_gl = istft_tf(X_complex, nfft, nhop)
       for i in range(ngl):
