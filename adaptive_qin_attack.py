@@ -1,4 +1,4 @@
-# Reproduce the adaptive attack in the WaveGuard paper.
+## A attacker uses the loss proposed in Qin et al.
 
 import numpy as np
 import tensorflow as tf

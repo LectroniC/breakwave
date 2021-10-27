@@ -68,7 +68,7 @@ def decode_audio(fp, fs=None, mono=False, normalize=False, fastwav=False):
 
   return fs, x
 
-def audio_preprocess_tf(x, conversion_needed=True):
+def audio_preprocess_tf(x):
   print("Here is the shape of waveform before preprocess")
   print(x.get_shape().as_list())
   if len(x.get_shape().as_list()) == 2:
@@ -78,15 +78,15 @@ def audio_preprocess_tf(x, conversion_needed=True):
   else:
     batches, nsamps, nch = x.shape
   x = tf.reshape(x, [batches, nsamps, 1, nch])
-  if conversion_needed:
+  if tf.reduce_max(x) < 1:
     x /= 32768.
   return x
 
-def audio_postprocess_tf(x, conversion_needed=True):
+def audio_postprocess_tf(x):
   print("Here is the shape of waveform before postprocess")
   print(x.get_shape().as_list())
   x = x[:, :, 0, 0]
-  if conversion_needed:
+  if tf.reduce_max(x) < 1:
     x *= 32768.
     x = tf.clip_by_value(x, -32768., 32767.)
   return x
