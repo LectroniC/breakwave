@@ -467,7 +467,7 @@ def waveform_to_mel_to_waveform_tf(x,
       # norm_min_level_db = -100
       # norm_ref_level_db = 20
       X_mel_db = (X_mel_dbnorm * -norm_min_level_db) + norm_min_level_db
-      X_mel = tf.math.pow(10, (X_mel_db + norm_ref_level_db) / norm_ref_level_db)
+      X_mel = tf.math.pow(10.0, (X_mel_db + norm_ref_level_db) / norm_ref_level_db)
       X_mag = tf.matmul(X_mel, tf.transpose(invmeltrans))
       return X_mag
     
