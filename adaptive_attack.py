@@ -122,7 +122,7 @@ class Attack:
                 loss = ctcloss_1 + ctcloss_2
             self.expanded_loss = tf.constant(0)
         else:
-            raise
+            raise NotImplemented("Unsupported attack type")
 
         self.loss = loss
         self.ctcloss_1 = ctcloss_1
@@ -345,7 +345,7 @@ def main():
         phrase = args.target
 
         # Set up the attack class and run it
-        attack = Attack(sess, 'BWCTC', len(phrase), maxlen,
+        attack = Attack(sess, 'WGCTC', len(phrase), maxlen,
                         batch_size=len(audios),
                         learning_rate=args.lr,
                         num_iterations=args.iterations,
