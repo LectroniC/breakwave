@@ -71,17 +71,17 @@ def decode_audio(fp, fs=None, mono=False, normalize=False, fastwav=False):
 def audio_preprocess_tf(x):
   print("Here is the shape of waveform before preprocess")
   print(x.get_shape().as_list())
-  if tf.experimental.numpy.ndim(x) == 1:
+  if len(tf.get_shape().as_list()) == 2:
     nsamps = x.shape[0]
     nch = 1
   else:
-    nsamps, nch = x.shape
-  x = tf.reshape(x, [nsamps, 1, nch])
+    batches, nsamps, nch = x.shape
+  x = tf.reshape(x, [batches, nsamps, 1, nch])
 
 def audio_postprocess_tf(x):
   print("Here is the shape of waveform before postprocess")
   print(x.get_shape().as_list())
-  x = x[:, 0, 0]
+  x = x[:, :, 0, 0]
   return x
 
 
