@@ -72,7 +72,8 @@ def audio_preprocess_tf(x):
   print("Here is the shape of waveform before preprocess")
   print(x.get_shape().as_list())
   if len(x.get_shape().as_list()) == 2:
-    nsamps = x.shape[0]
+    batches = x.shape[0]
+    nsamps = x.shape[1]
     nch = 1
   else:
     batches, nsamps, nch = x.shape
