@@ -465,6 +465,9 @@ def waveform_to_mel_to_waveform_tf(x,
     mel_bins = mel_num_bins
     input_mel_spec = waveform_to_melspec_tf(inp_audio, fs, NFFT, NHOP, mel_num_bins=mel_bins)
 
+    print("Here is after waveform_to_melspec_tf")
+    print(input_mel_spec.get_shape().as_list())
+
     def tacotron_mel_to_mag_tf(X_mel_dbnorm, invmeltrans):
       # norm_min_level_db = -100
       # norm_ref_level_db = 20
@@ -481,6 +484,8 @@ def waveform_to_mel_to_waveform_tf(x,
 
     def magspec_to_waveform_griffin_lim_tf(X_mag, nfft, nhop, ngl=60):
       batch, nsamps, nbins, nch = X_mag.shape
+      print("Here is magspec_to_waveform_griffin_lim_tf")
+      print(X_mag.get_shape().as_list())
       if nch != 1:
         raise NotImplementedError('Can only invert monaural signals')
       
