@@ -463,6 +463,10 @@ def waveform_to_mel_to_waveform_tf(x,
     NFFT = nfft
     NHOP = nhop 
     mel_bins = mel_num_bins
+
+    print("Here is before waveform_to_melspec_tf")
+    print(inp_audio.get_shape().as_list())
+
     input_mel_spec = waveform_to_melspec_tf(inp_audio, fs, NFFT, NHOP, mel_num_bins=mel_bins)
 
     print("Here is after waveform_to_melspec_tf")
