@@ -92,7 +92,8 @@ class Attack:
         waveguarded_pass_in = waveform_to_mel_to_waveform_tf(preprocess_passin, fs, NFFT, NHOP, mel_num_bins=mel_bins)
         transformed_pass_in = audioio.audio_postprocess_tf(waveguarded_pass_in)
 
-        self.logits_transformed = logits_transformed = get_logits(transformed_pass_in, lengths, reuse=True)
+        with tf.variable_scope("", reuse=True):
+            self.logits_transformed = logits_transformed = get_logits(transformed_pass_in, lengths, reuse=True)
 
         # And finally restore the graph to make the classifier
         # actually do something interesting.
