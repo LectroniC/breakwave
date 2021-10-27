@@ -486,7 +486,7 @@ def waveform_to_mel_to_waveform_tf(x,
       x_gl = istft_tf(X_complex, nfft, nhop)
       for i in range(ngl):
           imaginary_unit = tf.cast(1j, tf.complex64)
-          clean_angles = tf.angle(stft_tf(x_gl, nfft, nhop)) * imaginary_unit
+          clean_angles = tf.cast(tf.angle(stft_tf(x_gl, nfft, nhop)), tf.complex64) * imaginary_unit
           angles = tf.math.exp(clean_angles)
           reconst = X_complex * angles
           x_gl = istft_tf(reconst)
