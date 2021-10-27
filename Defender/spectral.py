@@ -124,6 +124,8 @@ def istft_tf(x, nfft, nhop, pad_end=True):
   """
   batch_size, nsamps, nfeats, nch = x.get_shape().as_list()
   if nfeats != 1:
+    print("Here is istft_tf")
+    print(x.get_shape().as_list())
     raise ValueError()
 
   window_fn = lambda _, dtype: lws_hann_default(nfft, nhop, dtype)
