@@ -111,22 +111,10 @@ def stft_tf(x, nfft, nhop, pad_end=True):
   return X
 
 def istft_tf(x, nfft, nhop, pad_end=True):
-  """Constructs graph for short-time invert Fourier transform.
-
-  Args:
-    x: Tensor dtype float32 of shape [b, nsamps, 1, nch].
-    nfft: FFT size.
-    nhop: Shift amount.
-    pad_end: If true, pad incomplete frames at end of waveform.
-
-  Returns:
-    Tensor dtype complex64 of shape [b, ntsteps, (nfft // 2) + 1, nch] containing the features.
   """
-  batch_size, nsamps, nfeats, nch = x.get_shape().as_list()
-  if nfeats != 1:
-    print("Here is istft_tf")
-    print(x.get_shape().as_list())
-    raise ValueError()
+  x is supposed to be [b, ntsteps, (nfft // 2) + 1, nch]
+  """
+  batch_size, ntsteps, bins, nch = x.get_shape().as_list()
 
   window_fn = lambda _, dtype: lws_hann_default(nfft, nhop, dtype)
 
