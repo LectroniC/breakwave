@@ -482,7 +482,7 @@ def waveform_to_mel_to_waveform_tf(x,
         raise NotImplementedError('Can only invert monaural signals')
       
       X_mag_i = X_mag[:, :, :, :]
-      X_complex = tf.cast(tf.abs(X_mag_i),  dtype=tf.complex128)
+      X_complex = tf.cast(tf.abs(X_mag_i),  dtype=tf.complex64)
       x_gl = istft_tf(X_complex, nfft, nhop)
       for i in range(ngl):
           angles = tf.exp(1j * tf.angle(stft_tf(x_gl, nfft, nhop)))
