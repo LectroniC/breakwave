@@ -78,7 +78,7 @@ def audio_preprocess_tf(x):
   else:
     batches, nsamps, nch = x.shape
   x = tf.reshape(x, [batches, nsamps, 1, nch])
-  if tf.reduce_max(x) < 1:
+  if tf.cond(tf.less(tf.reduce_max(x), 1), lambda: 1, lambda: 0):
     x /= 32768.
   return x
 
@@ -86,7 +86,7 @@ def audio_postprocess_tf(x):
   print("Here is the shape of waveform before postprocess")
   print(x.get_shape().as_list())
   x = x[:, :, 0, 0]
-  if tf.reduce_max(x) < 1:
+  if tf.cond(tf.less(tf.reduce_max(x), 1), lambda: 1, lambda: 0):
     x *= 32768.
     x = tf.clip_by_value(x, -32768., 32767.)
   return x
