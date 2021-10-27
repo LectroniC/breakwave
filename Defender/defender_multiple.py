@@ -180,7 +180,7 @@ def run_defense_on_directory(in_dir, out_base, defender_type, defender_hp, meta_
 
     output_fn = input_fn + '_tf.wav'
     output_fp = os.path.join(out_dir, output_fn)
-    audioio.save_as_wav(output_fp, fs, tf_output_spec_np[0,:,:,:])
+    audioio.save_as_wav(output_fp, fs, tf_output_spec_np)
 
   return out_dir
 
