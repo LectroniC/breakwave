@@ -237,7 +237,7 @@ def waveform_to_melspec_tf(
   if x.dtype != tf.float32:
     raise ValueError()
 
-  X = stft_tf(x, nfft, nhop)
+  X = stft_tf(x, nfft, nhop, pad_end=False)
   _, ntsteps, nfeats, _ = best_shape(X)
   X_mag = tf.abs(X)
 
@@ -486,7 +486,7 @@ def waveform_to_mel_to_waveform_tf(x,
       x_gl = istft_tf(X_complex, nfft, nhop)
       for i in range(ngl):
           imaginary_unit = tf.cast(1j, tf.complex64)
-          clean_angles = tf.cast(tf.angle(stft_tf(x_gl, nfft, nhop)), tf.complex64) * imaginary_unit
+          clean_angles = tf.cast(tf.angle(stft_tf(x_gl, nfft, nhop, pad_end=False)), tf.complex64) * imaginary_unit
           angles = tf.math.exp(clean_angles)
           reconst = X_complex * angles
           x_gl = istft_tf(reconst, nfft, nhop)
