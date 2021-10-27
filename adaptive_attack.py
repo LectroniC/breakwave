@@ -24,6 +24,7 @@ import DeepSpeech
 from tensorflow.python.keras.backend import ctc_label_dense_to_sparse
 from tf_logits import get_logits
 from Defender.spectral import waveform_to_mel_to_waveform_tf
+import Defender.audioio as audioio
 
 # These are the tokens that we're allowed to use.
 # The - token is special and corresponds to the epsilon
@@ -34,6 +35,7 @@ toks = " abcdefghijklmnopqrstuvwxyz'-"
 class Attack:
     def __init__(self, sess, loss_fn, phrase_length, max_audio_len,
                  learning_rate=10, num_iterations=5000, batch_size=1,
+                 fs=None,
                  mp3=False, l2penalty=float('inf'), restore_path=None):
         """
         Set up the attack procedure.
@@ -81,7 +83,11 @@ class Attack:
 
         # Feed this final value to get the logits.
         self.logits = logits = get_logits(pass_in, lengths)
-        transformed_pass_in = waveform_to_mel_to_waveform_tf(pass_in)
+
+        NFFT = 1024
+        NHOP = 256
+        mel_bins = 80
+        transformed_pass_in = waveform_to_mel_to_waveform_tf(pass_in, fs, NFFT, NHOP, mel_num_bins=mel_bins)
         self.logits_transformed = logits_transformed = get_logits(transformed_pass_in, lengths)
 
         # And finally restore the graph to make the classifier
@@ -324,6 +330,7 @@ def main():
                 finetune.append(list(wav.read(args.finetune[i])[1]))
 
         maxlen = max(map(len,audios))
+        # Padding multiple audio files in a batch
         audios = np.array([x+[0]*(maxlen-len(x)) for x in audios])
         finetune = np.array([x+[0]*(maxlen-len(x)) for x in finetune])
 
@@ -335,6 +342,7 @@ def main():
                         learning_rate=args.lr,
                         num_iterations=args.iterations,
                         l2penalty=args.l2penalty,
+                        fs = fs,
                         restore_path=args.restore_path)
         deltas = attack.attack(audios,
                                lengths,
