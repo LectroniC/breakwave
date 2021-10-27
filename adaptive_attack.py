@@ -82,7 +82,7 @@ class Attack:
         pass_in = tf.clip_by_value(new_input+noise, -2**15, 2**15-1)
 
         # Feed this final value to get the logits.
-        self.logits = logits = get_logits(pass_in, lengths)
+        self.logits = logits = get_logits(pass_in, lengths, reuse=True)
 
         # Apply the waveguard transform and keep the same format
         NFFT = 1024
