@@ -345,7 +345,7 @@ def main():
         phrase = args.target
 
         # Set up the attack class and run it
-        attack = Attack(sess, 'CTC', len(phrase), maxlen,
+        attack = Attack(sess, 'BWCTC', len(phrase), maxlen,
                         batch_size=len(audios),
                         learning_rate=args.lr,
                         num_iterations=args.iterations,
