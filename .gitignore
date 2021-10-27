@@ -1,4 +1,3 @@
 *.pyc
 DeepSpeech
-output_audios
 example_griffin_lim.py
