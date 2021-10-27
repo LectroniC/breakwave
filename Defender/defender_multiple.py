@@ -87,7 +87,9 @@ def run_defense_on_directory(in_dir, out_base, defender_type, defender_hp, meta_
   inp_audio = tf.placeholder('float32', [1, None, 1, 1])
   NFFT = 1024
   NHOP = 256
+
   input_mel_spec = spectral.waveform_to_melspec_tf(inp_audio, fs, NFFT, NHOP, mel_num_bins=mel_bins)[0]
+  tf_output_spec = spectral.waveform_to_mel_to_waveform_tf(inp_audio, fs, NFFT, NHOP, mel_num_bins=mel_bins)[0]
   input_mag_spec = tf.abs(spectral.stft_tf(inp_audio, NFFT, NHOP))[0]
 
 
@@ -110,7 +112,8 @@ def run_defense_on_directory(in_dir, out_base, defender_type, defender_hp, meta_
     fs, in_wav_np  = audioio.decode_audio(in_fp, fastwav = True)
     
     #print("INput wav", in_wav_np.min(), in_wav_np.max())
-    input_mel_spec_np, input_mag_spec_np, quant_dequant_np,down_up_sample_out,filter_out = spec_session.run([input_mel_spec,input_mag_spec, quant_dequant_in,down_up_sample_in,filter_power_in], 
+    tf_output_spec_np, input_mel_spec_np, input_mag_spec_np, quant_dequant_np,down_up_sample_out,filter_out = \
+      spec_session.run([tf_output_spec, input_mel_spec, input_mag_spec, quant_dequant_in,down_up_sample_in,filter_power_in], 
       feed_dict = {
         inp_audio : [in_wav_np]
     })
@@ -175,6 +178,7 @@ def run_defense_on_directory(in_dir, out_base, defender_type, defender_hp, meta_
     output_fp = os.path.join(out_dir, output_fn)
 
     audioio.save_as_wav(output_fp, fs, wave)
+    audioio.save_as_wav(output_fp, fs, tf_output_spec_np)
 
   return out_dir
 

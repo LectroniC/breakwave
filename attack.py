@@ -95,6 +95,8 @@ class Attack:
 
         # Feed this final value to get the logits.
         self.logits = logits = get_logits(pass_in, lengths)
+        transformed_pass_in = transform_func(pass_in)
+        self.logits_2 = logits_2 = get_logits(pass_in, lengths)
 
         # And finally restore the graph to make the classifier
         # actually do something interesting.
@@ -120,6 +122,8 @@ class Attack:
             
         elif loss_fn == "CW":
             raise NotImplemented("The current version of this project does not include the CW loss function implementation.")
+        elif loss_fn == "WGCTC":
+            raise
         else:
             raise
 

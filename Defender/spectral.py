@@ -95,7 +95,7 @@ def stft_tf(x, nfft, nhop, pad_end=True):
     pad_end: If true, pad incomplete frames at end of waveform.
 
   Returns:
-    Tensor dtype complex64 of shape [b, ntsteps, (nfft // 2) + 1, 1] containing the features.
+    Tensor dtype complex64 of shape [b, ntsteps, (nfft // 2) + 1, nch] containing the features.
   """
   batch_size, nsamps, nfeats, nch = x.get_shape().as_list()
   if nfeats != 1:
@@ -107,6 +107,31 @@ def stft_tf(x, nfft, nhop, pad_end=True):
   X = tf.contrib.signal.stft(x, nfft, nhop, window_fn=window_fn, pad_end=pad_end)
   X = tf.squeeze(X, axis=2)
   X = tf.transpose(X, [0, 2, 3, 1])
+
+  return X
+
+def istft_tf(x, nfft, nhop, pad_end=True):
+  """Constructs graph for short-time invert Fourier transform.
+
+  Args:
+    x: Tensor dtype float32 of shape [b, nsamps, 1, nch].
+    nfft: FFT size.
+    nhop: Shift amount.
+    pad_end: If true, pad incomplete frames at end of waveform.
+
+  Returns:
+    Tensor dtype complex64 of shape [b, ntsteps, (nfft // 2) + 1, nch] containing the features.
+  """
+  batch_size, nsamps, nfeats, nch = x.get_shape().as_list()
+  if nfeats != 1:
+    raise ValueError()
+
+  window_fn = lambda _, dtype: lws_hann_default(nfft, nhop, dtype)
+
+  x = tf.transpose(x, [0, 3, 1, 2])
+  x = tf.expand_dims(x, 2)
+  X = tf.contrib.signal.inverse_stft(x, nfft, nhop, window_fn=tf.signal.inverse_stft_window_fn(nhop, forward_window_fn=window_fn))
+  X = tf.transpose(X, [0, 3, 2, 1])
 
   return X
 
@@ -422,6 +447,55 @@ def melspec_to_waveform(
       x = x[:waveform_len]
 
   return x.astype(np.float32)
+
+
+def waveform_to_mel_to_waveform_tf(x,
+    fs,
+    nfft,
+    nhop,
+    mel_num_bins=80,
+    norm_min_level_db=-100,
+    norm_ref_level_db=20):
+
+    inp_audio = x
+    NFFT = nfft
+    NHOP = nhop 
+    mel_bins = mel_num_bins
+    input_mel_spec = waveform_to_melspec_tf(inp_audio, fs, NFFT, NHOP, mel_num_bins=mel_bins)
+
+    def tacotron_mel_to_mag_tf(X_mel_dbnorm, invmeltrans):
+      # norm_min_level_db = -100
+      # norm_ref_level_db = 20
+      X_mel_db = (X_mel_dbnorm * -norm_min_level_db) + norm_min_level_db
+      X_mel = tf.math.pow(10, (X_mel_db + norm_ref_level_db) / norm_ref_level_db)
+      X_mag = tf.matmul(X_mel, tf.transpose(invmeltrans))
+      return X_mag
+    
+    inv_mel_filterbank = create_inverse_mel_filterbank(
+          fs, NFFT, fmin=125, fmax=7600, n_mels=mel_bins)
+    inv_mel_filterbank = tf.constant(inv_mel_filterbank)
+    gen_mag = tacotron_mel_to_mag_tf(input_mel_spec[:,:,:,0], inv_mel_filterbank)
+    gen_mag = tf.expand_dims(gen_mag, -1)
+
+    def magspec_to_waveform_griffin_lim_tf(X_mag, nfft, nhop, ngl=60):
+      batch, nsamps, nbins, nch = X_mag.shape
+      if nch != 1:
+        raise NotImplementedError('Can only invert monaural signals')
+      
+      # TODO: Fix here with a differentiable version
+      X_mag_i = X_mag[:, :, :, 0]
+      X_complex = tf.cast(tf.abs(X_mag_i),  dtype=tf.complex128)
+      x_gl = istft_tf(X_complex, nfft, nhop)
+      for i in range(ngl):
+          angles = tf.exp(1j * tf.angle(stft_tf(x_gl, nfft, nhop)))
+          reconst = X_complex * angles
+          x_gl = istft_tf(reconst)
+      x_gl = tf.cast(x_gl[:, :, np.newaxis, np.newaxis], tf.float32)
+      return x_gl
+    
+    tf.cast(gen_mag, tf.float64)
+    wave = magspec_to_waveform_griffin_lim_tf(gen_mag, NFFT, NHOP)
+    return wave
 
 
 def r9y9_melspec_to_waveform(
