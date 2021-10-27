@@ -84,10 +84,14 @@ class Attack:
         # Feed this final value to get the logits.
         self.logits = logits = get_logits(pass_in, lengths)
 
+        # Apply the waveguard transform and keep the same format
         NFFT = 1024
         NHOP = 256
         mel_bins = 80
-        transformed_pass_in = waveform_to_mel_to_waveform_tf(pass_in, fs, NFFT, NHOP, mel_num_bins=mel_bins)
+        preprocess_passin = audioio.audio_preprocess_tf(pass_in)
+        waveguarded_pass_in = waveform_to_mel_to_waveform_tf(preprocess_passin, fs, NFFT, NHOP, mel_num_bins=mel_bins)
+        transformed_pass_in = audioio.audio_postprocess_tf(waveguarded_pass_in)
+
         self.logits_transformed = logits_transformed = get_logits(transformed_pass_in, lengths)
 
         # And finally restore the graph to make the classifier
@@ -320,6 +324,8 @@ def main():
         # Load the inputs that we're given
         for i in range(len(args.input)):
             fs, audio = wav.read(args.input[i])
+            print("decoded audio dtype")
+            print(audio.dtype)
             assert fs == 16000
             assert audio.dtype == np.int16
             print('source dB', 20*np.log10(np.max(np.abs(audio))))
@@ -330,7 +336,8 @@ def main():
                 finetune.append(list(wav.read(args.finetune[i])[1]))
 
         maxlen = max(map(len,audios))
-        # Padding multiple audio files in a batch
+        
+        # Padding multiple audio files in a batch to the same length
         audios = np.array([x+[0]*(maxlen-len(x)) for x in audios])
         finetune = np.array([x+[0]*(maxlen-len(x)) for x in finetune])
 
