@@ -71,7 +71,7 @@ def decode_audio(fp, fs=None, mono=False, normalize=False, fastwav=False):
 def audio_preprocess_tf(x):
   print("Here is the shape of waveform before preprocess")
   print(x.get_shape().as_list())
-  if len(tf.get_shape().as_list()) == 2:
+  if len(x.get_shape().as_list()) == 2:
     nsamps = x.shape[0]
     nch = 1
   else:
