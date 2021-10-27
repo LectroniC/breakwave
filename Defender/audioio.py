@@ -78,6 +78,7 @@ def audio_preprocess_tf(x):
   else:
     batches, nsamps, nch = x.shape
   x = tf.reshape(x, [batches, nsamps, 1, nch])
+  return x
 
 def audio_postprocess_tf(x):
   print("Here is the shape of waveform before postprocess")
