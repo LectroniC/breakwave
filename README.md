@@ -15,7 +15,7 @@ And `pip install pysndfx==0.3.6`
 And `pip install numpy==1.16.2`
 
 To run the code:
-`python Defender/defender_multiple.py --in_dir example_audios --out_base output_audios --defender_type mel_heuristic --defender_hp 80`
+`python Defender/defender_multiple.py --in_dir input_audios --out_base output_audios --defender_type mel_heuristic --defender_hp 80`
 
 example_audios downloaded from the [Audio Examples](https://waveguard.herokuapp.com/) page.
 
