@@ -171,14 +171,19 @@ def run_defense_on_directory(in_dir, out_base, defender_type, defender_hp, meta_
         gen_mag = gen_mag[0:x_mag_original_length]
 
       wave = spectral.magspec_to_waveform_lws(gen_mag.astype('float64'), NFFT, NHOP)
+      wave_gl = spectral.magspec_to_waveform_griffin_lim(gen_mag.astype('float64'), NFFT, NHOP, 60)
 
 
     input_fn = os.path.splitext(os.path.split(in_fp)[1])[0]
-    output_fn = input_fn + '.wav'
+    output_fn = input_fn + '_lws.wav'
     output_fp = os.path.join(out_dir, output_fn)
     audioio.save_as_wav(output_fp, fs, wave)
 
-    output_fn = input_fn + '_tf.wav'
+    output_fn = input_fn + '_gl.wav'
+    output_fp = os.path.join(out_dir, output_fn)
+    audioio.save_as_wav(output_fp, fs, wave_gl)
+
+    output_fn = input_fn + '_gl_tf.wav'
     output_fp = os.path.join(out_dir, output_fn)
     audioio.save_as_wav(output_fp, fs, tf_output_spec_np)
 
