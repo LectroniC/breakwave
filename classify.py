@@ -56,6 +56,7 @@ def main():
             raise Exception("Unknown file format")
         N = len(audio)
         print(audio.shape)
+        print(audio)
         new_input = tf.placeholder(tf.float32, [1, N])
         lengths = tf.placeholder(tf.int32, [1])
 
