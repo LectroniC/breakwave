@@ -473,9 +473,12 @@ def main():
     parser.add_argument('--finetune', type=str, nargs='+',
                         required=False,
                         help="Initial .wav file(s) to use as a starting point")
-    parser.add_argument('--lr', type=int,
+    parser.add_argument('--lr_stage1', type=int,
                         required=False, default=100,
-                        help="Learning rate for optimization")
+                        help="Learning rate for stage 1 optimization")
+    parser.add_argument('--lr_stage2', type=int,
+                        required=False, default=1,
+                        help="Learning rate for stage 2 optimization")
     parser.add_argument('--iterations_stage1', type=int,
                         required=False, default=1000,
                         help="Maximum number of iterations of stage 1")
@@ -550,7 +553,8 @@ def main():
         # Set up the attack class and run it
         attack = Attack(sess, 'QWGCTC', len(phrase), maxlen,
                         batch_size=len(audios),
-                        learning_rate=args.lr,
+                        learning_rate_stage1=args.lr_stage1,
+                        learning_rate_stage2=args.lr_stage2,
                         num_iterations_stage1=args.iterations_stage1,
                         num_iterations_stage2=args.iterations_stage2,
                         l2penalty=args.l2penalty,
