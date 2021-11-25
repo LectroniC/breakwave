@@ -100,3 +100,54 @@ def get_logits(new_input, length, first=[],reuse=False):
     logits, _ = DeepSpeech.BiRNN(features, length, [0]*10, reuse=reuse)
 
     return logits
+
+def get_logits_smooth(new_input, length, smooth_sigma, sample_num, smooth_type, first=[],reuse=False):
+    """
+    Compute the logits for a given waveform.
+
+    First, preprocess with the TF version of MFC above,
+    and then call DeepSpeech on the features.
+    """
+
+    batch_size = new_input.get_shape()[0]
+
+    # 1. Compute the MFCCs for the input audio
+    # (this is differentable with our implementation above)
+    empty_context = np.zeros((batch_size, 9, 26), dtype=np.float32)
+    new_input_to_mfcc = compute_mfcc(new_input)
+    features = tf.concat((empty_context, new_input_to_mfcc, empty_context), 1)
+
+    # 2. We get to see 9 frames at a time to make our decision,
+    # so concatenate them together.
+    features = tf.reshape(features, [new_input.get_shape()[0], -1])
+    features = tf.stack([features[:, i:i+19*26] for i in range(0,features.shape[1]-19*26+1,26)],1)
+    features = tf.reshape(features, [batch_size, -1, 19, 26])
+
+
+    # 3. Finally we process it with DeepSpeech
+    # We need to init DeepSpeech the first time we're called
+    if first == []:
+        first.append(False)
+
+        DeepSpeech.create_flags()
+        tf.app.flags.FLAGS.alphabet_config_path = "DeepSpeech/data/alphabet.txt"
+        DeepSpeech.initialize_globals()
+
+    original_logits, _ = DeepSpeech.BiRNN(features, length, [0]*10, reuse=reuse)
+    new_logits_ls = []
+    for _ in range(sample_num):
+        noise = tf.random_normal(shape=tf.shape(features), mean=0.0, stddev=smooth_sigma, dtype=tf.float32)
+        new_features = features + noise
+        new_logits, _ = DeepSpeech.BiRNN(new_features, length, [0]*10, reuse=reuse)
+        new_logits_ls.append(new_logits.eval().tolist()[:original_logits.get_shape()[0]])
+    new_logits_ls_np = np.array(new_logits_ls)
+    if smooth_type == 'mean':
+        logits_smooth = tf.convert_to_tensor(new_logits_ls_np.mean())
+    elif smooth_type == 'median':
+        logits_smooth = tf.convert_to_tensor(new_logits_ls_np.median())
+    elif smooth_type == 'majority':
+        logits_smooth = tf.convert_to_tensor(np.array(stats.mode(new_logits_ls_np)[0]))
+    else:
+        raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
+
+    return logits_smooth
