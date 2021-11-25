@@ -457,7 +457,6 @@ def main():
     For now we only support using CTC loss and only generating
     one adversarial example at a time.
     """
-    print(tf.config.list_physical_devices('GPU'))
     tf.config.set_soft_device_placement(True)
 
     parser = argparse.ArgumentParser(description=None)
@@ -498,93 +497,94 @@ def main():
     while len(sys.argv) > 1:
         sys.argv.pop()
     
-    with tf.Session() as sess:
-        finetune = []
-        audios = []
-        lengths = []
+    with tf.device('/device:GPU:2'):
+        with tf.Session() as sess:
+            finetune = []
+            audios = []
+            lengths = []
 
-        if args.out is None:
-            assert args.outprefix is not None
-        else:
-            assert args.outprefix is None
-            assert len(args.input) == len(args.out)
-        if args.finetune is not None and len(args.finetune):
-            assert len(args.input) == len(args.finetune)
-        
-        # Load the inputs that we're given
-        for i in range(len(args.input)):
-            fs, audio = wav.read(args.input[i])
-
-            # Convert
-            if max(audio) < 1:
-                audio = audio * 32768
+            if args.out is None:
+                assert args.outprefix is not None
             else:
-                audio = audio
+                assert args.outprefix is None
+                assert len(args.input) == len(args.out)
+            if args.finetune is not None and len(args.finetune):
+                assert len(args.input) == len(args.finetune)
             
-            print("decoded audio dtype")
-            print(audio.dtype)
-            assert fs == 16000
-            assert audio.dtype == np.int16
-            print('source dB', 20*np.log10(np.max(np.abs(audio))))
-            audios.append(list(audio))
-            lengths.append(len(audio))
+            # Load the inputs that we're given
+            for i in range(len(args.input)):
+                fs, audio = wav.read(args.input[i])
 
-            if args.finetune is not None:
-                finetune.append(list(wav.read(args.finetune[i])[1]))
+                # Convert
+                if max(audio) < 1:
+                    audio = audio * 32768
+                else:
+                    audio = audio
+                
+                print("decoded audio dtype")
+                print(audio.dtype)
+                assert fs == 16000
+                assert audio.dtype == np.int16
+                print('source dB', 20*np.log10(np.max(np.abs(audio))))
+                audios.append(list(audio))
+                lengths.append(len(audio))
 
-        maxlen = max(map(len,audios))
+                if args.finetune is not None:
+                    finetune.append(list(wav.read(args.finetune[i])[1]))
 
-        # Padding multiple audio files in a batch to the same length
-        audios = np.array([x+[0]*(maxlen-len(x)) for x in audios])
-        finetune = np.array([x+[0]*(maxlen-len(x)) for x in finetune])
+            maxlen = max(map(len,audios))
 
-        th_batch = []
-        psd_max_batch = []
-        # Calculate global threshold:
-        for i in range(len(audios)):
-            # Hardcode sample rate and window_size 
-            th, psd_max = generate_mask.generate_th(
-                audios[i].astype(float), 16000, WINDOW_SIZE
-            )
-            th_batch.append(th)
-            psd_max_batch.append(psd_max)
-        th_batch = np.array(th_batch)
-        psd_max_batch = np.array(psd_max_batch)
+            # Padding multiple audio files in a batch to the same length
+            audios = np.array([x+[0]*(maxlen-len(x)) for x in audios])
+            finetune = np.array([x+[0]*(maxlen-len(x)) for x in finetune])
 
-        phrase = args.target
+            th_batch = []
+            psd_max_batch = []
+            # Calculate global threshold:
+            for i in range(len(audios)):
+                # Hardcode sample rate and window_size 
+                th, psd_max = generate_mask.generate_th(
+                    audios[i].astype(float), 16000, WINDOW_SIZE
+                )
+                th_batch.append(th)
+                psd_max_batch.append(psd_max)
+            th_batch = np.array(th_batch)
+            psd_max_batch = np.array(psd_max_batch)
 
-        # Set up the attack class and run it
-        attack = Attack(sess, 'QWGCTC', len(phrase), maxlen,
-                        batch_size=len(audios),
-                        learning_rate_stage1=args.lr_stage1,
-                        learning_rate_stage2=args.lr_stage2,
-                        num_iterations_stage1=args.iterations_stage1,
-                        num_iterations_stage2=args.iterations_stage2,
-                        l2penalty=args.l2penalty,
-                        fs = fs,
-                        restore_path=args.restore_path)
-        deltas = attack.attack_stage_1(audios,
-                               lengths,
-                               [[toks.index(x) for x in phrase]]*len(audios),
-                               finetune)
-        
-        deltas = attack.attack_stage_2(audios,
-                               lengths,
-                               [[toks.index(x) for x in phrase]]*len(audios),
-                               finetune=deltas,
-                               th_batch=th_batch,
-                               psd_max_batch=psd_max_batch
-                               )
+            phrase = args.target
 
-        # And now save it to the desired output
-        for i in range(len(args.input)):
-            if args.out is not None:
-                path = args.out[i]
-            else:
-                path = args.outprefix+str(i)+".wav"
-            wav.write(path, 16000,
-                        np.array(np.clip(np.round(deltas[i][:lengths[i]]),
-                                        -2**15, 2**15-1),dtype=np.int16))
-            print("Final distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
+            # Set up the attack class and run it
+            attack = Attack(sess, 'QWGCTC', len(phrase), maxlen,
+                            batch_size=len(audios),
+                            learning_rate_stage1=args.lr_stage1,
+                            learning_rate_stage2=args.lr_stage2,
+                            num_iterations_stage1=args.iterations_stage1,
+                            num_iterations_stage2=args.iterations_stage2,
+                            l2penalty=args.l2penalty,
+                            fs = fs,
+                            restore_path=args.restore_path)
+            deltas = attack.attack_stage_1(audios,
+                                lengths,
+                                [[toks.index(x) for x in phrase]]*len(audios),
+                                finetune)
+            
+            deltas = attack.attack_stage_2(audios,
+                                lengths,
+                                [[toks.index(x) for x in phrase]]*len(audios),
+                                finetune=deltas,
+                                th_batch=th_batch,
+                                psd_max_batch=psd_max_batch
+                                )
+
+            # And now save it to the desired output
+            for i in range(len(args.input)):
+                if args.out is not None:
+                    path = args.out[i]
+                else:
+                    path = args.outprefix+str(i)+".wav"
+                wav.write(path, 16000,
+                            np.array(np.clip(np.round(deltas[i][:lengths[i]]),
+                                            -2**15, 2**15-1),dtype=np.int16))
+                print("Final distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
 
 main()
