@@ -538,7 +538,7 @@ def main():
         for i in range(len(audios)):
             # Hardcode sample rate and window_size 
             th, psd_max = generate_mask.generate_th(
-                audios[i], 16000, WINDOW_SIZE
+                audios[i].astype(float), 16000, WINDOW_SIZE
             )
             th_batch.append(th)
             psd_max_batch.append(psd_max)
