@@ -457,10 +457,6 @@ def main():
     For now we only support using CTC loss and only generating
     one adversarial example at a time.
     """
-    if tf.test.gpu_device_name():
-        print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
-    else:
-        print("Please install GPU version of TF")
 
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('--in', type=str, dest="input", nargs='+',
