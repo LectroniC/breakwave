@@ -7,7 +7,7 @@ You can't directly deploy this on windows.
 
 You need sox for pysndfx. And sox doesn't support windows therefore can't run natively on windows. You can't run this on windows.
 
-On Debian-based systm, you need `apt install build-essential`. 
+On Debian-based systm, you need `sudo apt-get install build-essential`. 
 
 And install git lfs. (https://askubuntu.com/questions/799341/how-to-install-git-lfs-on-ubuntu-16-04)
 
@@ -25,7 +25,7 @@ You need:
 
 `pip install pysndfx==0.3.6`
 
-Or you can use the `environment.yml` to set up the environment.
+Or you can use the `environment.yml` to set up the environment with `conda env update --file environment.yml --prune`.
 
 
 To run the code:
@@ -36,7 +36,7 @@ example_audios downloaded from the [Audio Examples](https://waveguard.herokuapp.
 Choose `defender_hp=80` since this is the choice from the paper.
 
 
-# Old README
+# Old README From WaveGuard For Reference
 
 Code for our USENIX 21 paper [WaveGuard: Understanding and Mitigating Audio Adversarial Examples
 ](https://www.usenix.org/system/files/sec21fall-hussain.pdf).
