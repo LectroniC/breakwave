@@ -457,6 +457,9 @@ def main():
     For now we only support using CTC loss and only generating
     one adversarial example at a time.
     """
+    print(tf.config.list_physical_devices('GPU'))
+    tf.config.set_soft_device_placement(True)
+
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('--in', type=str, dest="input", nargs='+',
                         required=True,
