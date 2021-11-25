@@ -476,9 +476,12 @@ def main():
     parser.add_argument('--lr', type=int,
                         required=False, default=100,
                         help="Learning rate for optimization")
-    parser.add_argument('--iterations', type=int,
+    parser.add_argument('--iterations_stage1', type=int,
                         required=False, default=1000,
-                        help="Maximum number of iterations of gradient descent")
+                        help="Maximum number of iterations of stage 1")
+    parser.add_argument('--iterations_stage2', type=int,
+                        required=False, default=100,
+                        help="Maximum number of iterations of stage 2")
     parser.add_argument('--l2penalty', type=float,
                         required=False, default=float('inf'),
                         help="Weight for l2 penalty on loss function")
@@ -548,7 +551,8 @@ def main():
         attack = Attack(sess, 'QWGCTC', len(phrase), maxlen,
                         batch_size=len(audios),
                         learning_rate=args.lr,
-                        num_iterations=args.iterations,
+                        num_iterations_stage1=args.iterations_stage1,
+                        num_iterations_stage2=args.iterations_stage2,
                         l2penalty=args.l2penalty,
                         fs = fs,
                         restore_path=args.restore_path)
