@@ -85,8 +85,8 @@ class Attack:
         self.target_phrase_lengths = tf.Variable(np.zeros((batch_size), dtype=np.int32), name='qq_phrase_lengths')
         self.rescale = tf.Variable(np.zeros((batch_size,1), dtype=np.float32), name='qq_phrase_lengths')
 
-        self.th = tf.Variable(np.zeros((batch_size, None, None), dtype=np.float32), name="qq_th")
-        self.psd_max_ori = tf.Variable(np.zeros((batch_size),dtype=np.float32), name="qq_psd")
+        self.th = tf.placeholder(tf.float32, shape=[batch_size, None, None], name="qq_th")
+        self.psd_max_ori = tf.placeholder(tf.float32, shape=[batch_size], name="qq_psd")
         self.alpha = tf.Variable(np.ones((batch_size), dtype=np.float32) * 0.05, name="qq_alpha")
         
 
