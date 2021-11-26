@@ -180,13 +180,6 @@ class Attack:
         self.train22 = optimizer_stage2.apply_gradients([(grad22, var22)])
         self.train2 = tf.group(self.train21, self.train22)
         
-
-        """
-        grad2,var2 = optimizer_stage2.compute_gradients(self.loss + self.alpha * self.loss_th, [delta])[0]
-        self.train2 = optimizer_stage2.apply_gradients([(grad2, var2)])
-        """
-
-        
         end_vars = tf.global_variables()
         new_vars = [x for x in end_vars if x.name not in start_vars]
         
