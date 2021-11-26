@@ -28,7 +28,7 @@ import Defender.audioio as audioio
 toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 WINDOW_SIZE = 2048
-MIN_TH = 0.05 
+MIN_TH = 0.005 
 
 class Transform(object):
     """
