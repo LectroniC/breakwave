@@ -28,7 +28,7 @@ import Defender.audioio as audioio
 toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 WINDOW_SIZE = 2048
-MIN_TH = 0.005 
+MIN_TH = 0.00005
 
 class Transform(object):
     """
@@ -496,10 +496,10 @@ def main():
                         required=False, default=1,
                         help="Learning rate for stage 2 optimization")
     parser.add_argument('--iterations_stage1', type=int,
-                        required=False, default=1000,
+                        required=False, default=1500,
                         help="Maximum number of iterations of stage 1")
     parser.add_argument('--iterations_stage2', type=int,
-                        required=False, default=4000,
+                        required=False, default=2500,
                         help="Maximum number of iterations of stage 2")
     parser.add_argument('--l2penalty', type=float,
                         required=False, default=float('inf'),
