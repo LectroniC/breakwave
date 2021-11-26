@@ -402,7 +402,7 @@ class Attack:
             }
                 
             # Actually do the optimization ste
-            d, el, cl_1, cl_2, l, l_th, logits, logits_transformed, new_input, _ = sess.run((self.delta, self.expanded_loss,
+            d, el, cl_1, cl_2, l, l_th, logits, logits_transformed, new_input, _, alpha = sess.run((self.delta, self.expanded_loss,
                                                            self.ctcloss_1, self.ctcloss_2, self.loss, self.loss_th,
                                                            self.logits, self.logits_transformed, self.new_input,
                                                            self.train2),
@@ -412,6 +412,7 @@ class Attack:
             print("stage 2 cl_1 %.3f"%np.mean(cl_1), "\t", "\t".join("%.3f"%x for x in cl_1))
             print("stage 2 cl_2 %.3f"%np.mean(cl_2), "\t", "\t".join("%.3f"%x for x in cl_2))
             print("stage 2 l_th %.3f"%np.mean(l_th), "\t", "\t".join("%.3f"%x for x in l_th))
+            print("stage 2 alpha %.3f"%alpha, "\t",)
 
             for ii in range(self.batch_size):
                 # Every 100 iterations, check if we've succeeded
