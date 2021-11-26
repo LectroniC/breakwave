@@ -87,7 +87,7 @@ class Attack:
 
         self.th = tf.placeholder(tf.float32, shape=[batch_size, None, None], name="qq_th")
         self.psd_max_ori = tf.placeholder(tf.float32, shape=[batch_size], name="qq_psd")
-        self.alpha = tf.Variable(np.ones((batch_size), dtype=np.float32) * 0.05, name="qq_alpha")
+        self.alpha = tf.Variable(np.ones((batch_size), dtype=np.float32) * 0.0, name="qq_alpha")
         
 
         # Initially we bound the l_infty norm by 2000, increase this
