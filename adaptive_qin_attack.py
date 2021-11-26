@@ -551,6 +551,9 @@ def main():
         th_batch = np.array(th_batch)
         psd_max_batch = np.array(psd_max_batch)
 
+        print(th_batch)
+        print(psd_max_batch)
+
         phrase = args.target
 
         # Set up the attack class and run it
