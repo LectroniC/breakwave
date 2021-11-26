@@ -566,7 +566,8 @@ def main():
                             lengths,
                             [[toks.index(x) for x in phrase]]*len(audios),
                             finetune)
-        
+        print("Deltas shape")
+        print(deltas.shape)
         print("stage 2")
         deltas = attack.attack_stage_2(audios,
                             lengths,
