@@ -312,7 +312,7 @@ class Attack:
                               np.array(np.clip(np.round(new_input[ii]),
                                                -2**15, 2**15-1),dtype=np.int16))
 
-        return final_deltas, delta
+        return final_deltas
     
     def attack_stage_2(self, audio, lengths, target, finetune=None, th_batch=None, psd_max_batch=None):
 
@@ -568,7 +568,6 @@ def main():
                             finetune)
         print("Deltas shape")
         print(len(deltas))
-        print(deltas[0].shape)
         print("audios shape")
         print(audios.shape)
         print("stage 2")
