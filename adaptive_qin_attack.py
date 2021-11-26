@@ -239,12 +239,12 @@ class Attack:
 
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
-                    print("\n".join(res))
+                    print("Reduced:"+"\n".join(res))
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
-                    print("\n".join(res2))
+                    print("Orig:"+"\n".join(res2))
 
                     print("defended:\n")
                     chars = out_transformed[0].values
@@ -255,12 +255,12 @@ class Attack:
 
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
-                    print("\n".join(res))
+                    print("Reduced:"+"\n".join(res))
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits_transformed,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
-                    print("\n".join(res2))
+                    print("Orig:"+"\n".join(res2))
 
             feed_dict = {}
                 
@@ -272,8 +272,8 @@ class Attack:
                                                           feed_dict)
                     
             # Report progress
-            print("cl_1 %.3f"%np.mean(cl_1), "\t", "\t".join("%.3f"%x for x in cl_1))
-            print("cl_2 %.3f"%np.mean(cl_2), "\t", "\t".join("%.3f"%x for x in cl_2))
+            print("stage 1 cl_1 %.3f"%np.mean(cl_1), "\t", "\t".join("%.3f"%x for x in cl_1))
+            print("stage 1 cl_2 %.3f"%np.mean(cl_2), "\t", "\t".join("%.3f"%x for x in cl_2))
 
             for ii in range(self.batch_size):
                 # Every 100 iterations, check if we've succeeded
@@ -365,14 +365,14 @@ class Attack:
 
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
-                    print("\n".join(res))
+                    print("Reduced:"+"\n".join(res))
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
                     print("\n".join(res2))
 
-                    print("defended:\n")
+                    print("Orig:"+"defended:\n")
                     chars = out_transformed[0].values
                     res = np.zeros(out_transformed[0].dense_shape)+len(toks)-1
                     for ii in range(len(out_transformed[0].values)):
@@ -381,12 +381,12 @@ class Attack:
 
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
-                    print("\n".join(res))
+                    print("Reduced:"+"\n".join(res))
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits_transformed,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
-                    print("\n".join(res2))
+                    print("Orig:"+"\n".join(res2))
 
             feed_dict = {
                 self.th: th_batch,
@@ -567,6 +567,7 @@ def main():
                             [[toks.index(x) for x in phrase]]*len(audios),
                             finetune)
         
+        print("stage 2")
         deltas = attack.attack_stage_2(audios,
                             lengths,
                             [[toks.index(x) for x in phrase]]*len(audios),
