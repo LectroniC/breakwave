@@ -568,6 +568,8 @@ def main():
                             finetune)
         print("Deltas shape")
         print(deltas.shape)
+        print("audios shape")
+        print(audios.shape)
         print("stage 2")
         deltas = attack.attack_stage_2(audios,
                             lengths,
