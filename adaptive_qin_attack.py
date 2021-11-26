@@ -281,7 +281,7 @@ class Attack:
                 # should record our progress and decrease the
                 # rescale constant.
 
-                if (self.loss_fn == "QWGCTC" and i%10 == 0 and res[ii]==t_res[ii] and res[ii] == "".join([toks[x] for x in target[ii]])) \
+                if (i%10 == 0 and res[ii]==t_res[ii] and res[ii] == "".join([toks[x] for x in target[ii]])) \
                    or (i == MAX-1 and final_deltas[ii] is None):
                     # Get the current constant
                     rescale = sess.run(self.rescale)
@@ -336,7 +336,10 @@ class Attack:
         sess.run(tf.assign(self.alpha, np.ones((self.batch_size), dtype=np.float32) * 0.05))
 
         # Here we'll keep track of the best solution we've found so far
+        loss_th = [np.inf] * self.batch_size
         final_deltas = [None]*self.batch_size
+        final_alpha = [None] * self.batch_size
+
         if finetune is not None and len(finetune) > 0:
             sess.run(self.delta.assign(finetune-audio))
         
@@ -410,41 +413,50 @@ class Attack:
                 # if we have (or if it's the final epoch) then we
                 # should record our progress and decrease the
                 # rescale constant.
+                if i%10 == 0:
+                    alpha = sess.run(self.alpha)
+                    if (res[ii] == t_res[ii] and res[ii] == "".join([toks[x] for x in target[ii]])):
+                        if l_th[ii] < loss_th[ii]:
+                            loss_th[ii] = l[ii]
+                            final_alpha[ii] = alpha[ii]
+                            final_deltas[ii] = new_input[ii]
 
-                if (self.loss_fn == "QWGCTC" and i%10 == 0 and res[ii] == t_res[ii] and res[ii] == "".join([toks[x] for x in target[ii]])) \
-                   or (i == MAX-1 and final_deltas[ii] is None):
-                    # Get the current constant
-                    rescale = sess.run(self.rescale)
-                    if rescale[ii]*2000 > np.max(np.abs(d)):
-                        # If we're already below the threshold, then
-                        # just reduce the threshold to the current
-                        # point and save some time.
-                        print("It's way over", np.max(np.abs(d[ii]))/2000.0)
-                        rescale[ii] = np.max(np.abs(d[ii]))/2000.0
+                            rescale = sess.run(self.rescale)
+                            if rescale[ii]*2000 > np.max(np.abs(d)):
+                                # If we're already below the threshold, then
+                                # just reduce the threshold to the current
+                                # point and save some time.
+                                print("It's way over", np.max(np.abs(d[ii]))/2000.0)
+                                rescale[ii] = np.max(np.abs(d[ii]))/2000.0
+                            rescale[ii] *= .8
+                            print(
+                                "-------------------------------------Succeed---------------------------------"
+                            )
+                            print("Worked i=%d ctcloss_1=%f bound=%f"%(ii,cl_1[ii], 2000*rescale[ii][0]))
+                            print("Worked i=%d ctcloss_2=%f bound=%f"%(ii,cl_2[ii], 2000*rescale[ii][0]))                         
+                            print(
+                                "save the best example=%d at iteration= %d, alpha = %f"
+                                % (ii, i, alpha[ii])
+                            )
+                            sess.run(self.rescale.assign(rescale))   
 
-                    # Otherwise reduce it by some constant. The closer
-                    # this number is to 1, the better quality the result
-                    # will be. The smaller, the quicker we'll converge
-                    # on a result but it will be lower quality.
-                    rescale[ii] *= .8
+                        # increase the alpha each 20 iterations
+                        if i % 20 == 0:
+                            alpha[ii] *= 1.2
+                            sess.run(tf.assign(self.alpha, alpha))
 
-                    # Adjust the best solution found so far
+                        # Just for debugging, save the adversarial example
+                        # to /tmp so we can see it if we want
+                        # wav.write("/tmp/adv.wav", 16000,
+                        #         np.array(np.clip(np.round(new_input[ii]),
+                        #                         -2**15, 2**15-1),dtype=np.int16))
+                    if i % 50 == 0:
+                        alpha[ii] *= 0.8
+                        alpha[ii] = max(alpha[ii], min_th)
+                        sess.run(tf.assign(self.alpha, alpha))
+                    
+                if i == MAX-1 and final_deltas[ii] is None:
                     final_deltas[ii] = new_input[ii]
-
-                    print("Worked i=%d ctcloss_1=%f bound=%f"%(ii,cl_1[ii], 2000*rescale[ii][0]))
-                    print("Worked i=%d ctcloss_2=%f bound=%f"%(ii,cl_2[ii], 2000*rescale[ii][0]))
-                    #print('delta',np.max(np.abs(new_input[ii]-audio[ii])))
-                    sess.run(self.rescale.assign(rescale))
-
-                    # Just for debugging, save the adversarial example
-                    # to /tmp so we can see it if we want
-                    wav.write("/tmp/adv.wav", 16000,
-                              np.array(np.clip(np.round(new_input[ii]),
-                                               -2**15, 2**15-1),dtype=np.int16))
-                elif (i % 50 == 0):
-                    alpha[ii] *= 0.8
-                    alpha[ii] = max(alpha[ii], min_th)
-                    sess.run(tf.assign(self.alpha, alpha))
 
         return final_deltas
     
