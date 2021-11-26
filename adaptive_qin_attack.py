@@ -49,7 +49,7 @@ class Transform(object):
 
 class Attack:
     def __init__(self, sess, loss_fn, phrase_length, max_audio_len,
-                 learning_rate_stage1=10, learning_rate_stage2=10, 
+                 learning_rate_stage1=10, learning_rate_stage2=1, 
                  num_iterations_stage1=10, num_iterations_stage2=2000, 
                  batch_size=1,
                  fs=None,
