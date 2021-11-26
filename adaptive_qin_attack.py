@@ -174,16 +174,17 @@ class Attack:
 
 
         optimizer_stage2 = tf.train.AdamOptimizer(learning_rate_stage2)
-        """
         grad21,var21 = optimizer_stage2.compute_gradients(self.loss, [delta])[0]
         grad22,var22 = optimizer_stage2.compute_gradients(self.alpha * self.loss_th, [delta])[0]
-        self.train21 = optimizer_stage2.apply_gradients([(grad21, var21)])
+        self.train21 = optimizer_stage2.apply_gradients([(tf.sign(grad21), var21)])
         self.train22 = optimizer_stage2.apply_gradients([(grad22, var22)])
         self.train2 = tf.group(self.train21, self.train22)
-        """
+        
 
+        """
         grad2,var2 = optimizer_stage2.compute_gradients(self.loss + self.alpha * self.loss_th, [delta])[0]
         self.train2 = optimizer_stage2.apply_gradients([(grad2, var2)])
+        """
 
         
         end_vars = tf.global_variables()
@@ -328,17 +329,17 @@ class Attack:
         # object, and they should be all created only once in the
         # constructor. It works fine as long as you don't call
         # attack() a bunch of times.
-        
-        # sess.run(tf.variables_initializer([self.delta]))
-        # sess.run(self.original.assign(np.array(audio)))
-        # sess.run(self.lengths.assign((np.array(lengths)-1)//320))
-        # sess.run(self.mask.assign(np.array([[1 if i < l else 0 for i in range(self.max_audio_len)] for l in lengths])))
-        # sess.run(self.cwmask.assign(np.array([[1 if i < l else 0 for i in range(self.phrase_length)] for l in (np.array(lengths)-1)//320])))
-        # sess.run(self.target_phrase_lengths.assign(np.array([len(x) for x in target])))
-        # sess.run(self.target_phrase.assign(np.array([list(t)+[0]*(self.phrase_length-len(t)) for t in target])))
-        # c = np.ones((self.batch_size, self.phrase_length))
-        # sess.run(self.importance.assign(c))
-        # sess.run(self.rescale.assign(np.ones((self.batch_size,1))))
+
+        sess.run(tf.variables_initializer([self.delta]))
+        sess.run(self.original.assign(np.array(audio)))
+        sess.run(self.lengths.assign((np.array(lengths)-1)//320))
+        sess.run(self.mask.assign(np.array([[1 if i < l else 0 for i in range(self.max_audio_len)] for l in lengths])))
+        sess.run(self.cwmask.assign(np.array([[1 if i < l else 0 for i in range(self.phrase_length)] for l in (np.array(lengths)-1)//320])))
+        sess.run(self.target_phrase_lengths.assign(np.array([len(x) for x in target])))
+        sess.run(self.target_phrase.assign(np.array([list(t)+[0]*(self.phrase_length-len(t)) for t in target])))
+        c = np.ones((self.batch_size, self.phrase_length))
+        sess.run(self.importance.assign(c))
+        sess.run(self.rescale.assign(np.ones((self.batch_size,1))))
         sess.run(tf.assign(self.alpha, np.ones((self.batch_size), dtype=np.float32) * 0.0))
 
         # Here we'll keep track of the best solution we've found so far
