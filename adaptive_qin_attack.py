@@ -567,7 +567,8 @@ def main():
                             [[toks.index(x) for x in phrase]]*len(audios),
                             finetune)
         print("Deltas shape")
-        print(deltas.shape)
+        print(len(deltas))
+        print(deltas[0].shape)
         print("audios shape")
         print(audios.shape)
         print("stage 2")
