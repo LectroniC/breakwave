@@ -405,7 +405,7 @@ class Attack:
             d, el, cl_1, cl_2, l, l_th, logits, logits_transformed, new_input, _, alpha = sess.run((self.delta, self.expanded_loss,
                                                            self.ctcloss_1, self.ctcloss_2, self.loss, self.loss_th,
                                                            self.logits, self.logits_transformed, self.new_input,
-                                                           self.train2),
+                                                           self.train2, self.alpha),
                                                           feed_dict)
                     
             # Report progress
