@@ -87,7 +87,7 @@ class Attack:
 
         self.th = tf.placeholder(tf.float32, shape=[batch_size, None, None], name="qq_th")
         self.psd_max_ori = tf.placeholder(tf.float32, shape=[batch_size], name="qq_psd")
-        self.alpha = tf.Variable(np.ones((batch_size), dtype=np.float32) * 0.0, name="qq_alpha")
+        self.alpha = tf.Variable(np.zeros((batch_size), dtype=np.float32), name="qq_alpha")
         
 
         # Initially we bound the l_infty norm by 2000, increase this
@@ -338,7 +338,7 @@ class Attack:
         c = np.ones((self.batch_size, self.phrase_length))
         sess.run(self.importance.assign(c))
         sess.run(self.rescale.assign(np.ones((self.batch_size,1))))
-        sess.run(tf.assign(self.alpha, np.ones((self.batch_size), dtype=np.float32) * 0.05))
+        sess.run(tf.assign(self.alpha, np.ones((self.batch_size), dtype=np.float32) * 0.0))
 
         # Here we'll keep track of the best solution we've found so far
         loss_th = [np.inf] * self.batch_size
