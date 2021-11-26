@@ -28,7 +28,8 @@ import Defender.audioio as audioio
 toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 WINDOW_SIZE = 2048
-MIN_TH = 0.00005
+#0.005 Too small
+MIN_TH = 0.0
 
 class Transform(object):
     """
@@ -408,7 +409,7 @@ class Attack:
             print("stage 2 cl_1 %.3f"%np.mean(cl_1), "\t", "\t".join("%.3f"%x for x in cl_1))
             print("stage 2 cl_2 %.3f"%np.mean(cl_2), "\t", "\t".join("%.3f"%x for x in cl_2))
             print("stage 2 l_th %.3f"%np.mean(l_th), "\t", "\t".join("%.3f"%x for x in l_th))
-            print("stage 2 alpha %.3f"%alpha, "\t",)
+            print("stage 2 alpha %f"%alpha, "\t",)
 
             for ii in range(self.batch_size):
                 # Every 100 iterations, check if we've succeeded
@@ -496,10 +497,10 @@ def main():
                         required=False, default=1,
                         help="Learning rate for stage 2 optimization")
     parser.add_argument('--iterations_stage1', type=int,
-                        required=False, default=1500,
+                        required=False, default=1000,
                         help="Maximum number of iterations of stage 1")
     parser.add_argument('--iterations_stage2', type=int,
-                        required=False, default=2500,
+                        required=False, default=2000,
                         help="Maximum number of iterations of stage 2")
     parser.add_argument('--l2penalty', type=float,
                         required=False, default=float('inf'),
