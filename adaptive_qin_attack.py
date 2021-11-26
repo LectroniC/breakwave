@@ -563,11 +563,7 @@ def main():
         th_batch = np.array(th_batch)
         psd_max_batch = np.array(psd_max_batch)
 
-        print(th_batch)
-        print(psd_max_batch)
-
         phrase = args.target
-
         # Set up the attack class and run it
         attack = Attack(sess, 'QWGCTC', len(phrase), maxlen,
                         batch_size=len(audios),
@@ -582,6 +578,17 @@ def main():
                             lengths,
                             [[toks.index(x) for x in phrase]]*len(audios),
                             finetune)
+        
+        # And now save it to the desired output
+        for i in range(len(args.input)):
+            if args.out is not None:
+                path = args.out[i]
+            else:
+                path = args.outprefix+str(i)+"stage_1_temp.wav"
+            wav.write(path, 16000,
+                        np.array(np.clip(np.round(deltas[i][:lengths[i]]),
+                                        -2**15, 2**15-1),dtype=np.int16))
+            print("Final distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
         
         print("stage 2")
         deltas = attack.attack_stage_2(audios,
