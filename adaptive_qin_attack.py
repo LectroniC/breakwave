@@ -28,6 +28,7 @@ import Defender.audioio as audioio
 toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 WINDOW_SIZE = 2048
+MIN_TH = 0.05 
 
 class Transform(object):
     """
@@ -333,7 +334,7 @@ class Attack:
         c = np.ones((self.batch_size, self.phrase_length))
         sess.run(self.importance.assign(c))
         sess.run(self.rescale.assign(np.ones((self.batch_size,1))))
-        sess.run(tf.assign(self.alpha, np.ones((self.batch_size), dtype=np.float32) * 0.0))
+        sess.run(tf.assign(self.alpha, np.ones((self.batch_size), dtype=np.float32) * MIN_TH))
 
         # Here we'll keep track of the best solution we've found so far
         loss_th = [np.inf] * self.batch_size
@@ -346,7 +347,7 @@ class Attack:
         # We'll make a bunch of iterations of gradient descent here
         now = time.time()
         MAX = self.num_iterations_stage2
-        min_th = 0.0000
+        min_th = MIN_TH
         for i in range(MAX):
             iteration = i
             now = time.time()
