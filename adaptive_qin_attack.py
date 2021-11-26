@@ -239,28 +239,28 @@ class Attack:
 
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
-                    print("Reduced:"+"\n".join(res))
+                    print("Reduced:\n"+"\n".join(res))
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
-                    print("Orig:"+"\n".join(res2))
+                    print("Orig:\n"+"\n".join(res2))
 
                     print("defended:\n")
                     chars = out_transformed[0].values
-                    res = np.zeros(out_transformed[0].dense_shape)+len(toks)-1
+                    t_res = np.zeros(out_transformed[0].dense_shape)+len(toks)-1
                     for ii in range(len(out_transformed[0].values)):
                         x,y = out_transformed[0].indices[ii]
-                        res[x,y] = out_transformed[0].values[ii]
+                        t_res[x,y] = out_transformed[0].values[ii]
 
                     # Here we print the strings that are recognized.
-                    res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
-                    print("Reduced:"+"\n".join(res))
+                    t_res = ["".join(toks[int(x)] for x in y).replace("-","") for y in t_res]
+                    print("Reduced:\n"+"\n".join(t_res))
                     
                     # And here we print the argmax of the alignment.
-                    res2 = np.argmax(logits_transformed,axis=2).T
-                    res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
-                    print("Orig:"+"\n".join(res2))
+                    t_res2 = np.argmax(logits_transformed,axis=2).T
+                    t_res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(t_res2,lengths)]
+                    print("Orig:\n"+"\n".join(t_res2))
 
             feed_dict = {}
                 
@@ -281,7 +281,7 @@ class Attack:
                 # should record our progress and decrease the
                 # rescale constant.
 
-                if (self.loss_fn == "QWGCTC" and i%10 == 0 and res[ii] == "".join([toks[x] for x in target[ii]])) \
+                if (self.loss_fn == "QWGCTC" and i%10 == 0 and res[ii]==t_res[ii] and res[ii] == "".join([toks[x] for x in target[ii]])) \
                    or (i == MAX-1 and final_deltas[ii] is None):
                     # Get the current constant
                     rescale = sess.run(self.rescale)
@@ -365,28 +365,28 @@ class Attack:
 
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
-                    print("Reduced:"+"\n".join(res))
+                    print("Reduced:\n"+"\n".join(res))
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
-                    print("\n".join(res2))
+                    print("Orig:\n"+"\n".join(res2))
 
-                    print("Orig:"+"defended:\n")
+                    print("defended:\n")
                     chars = out_transformed[0].values
-                    res = np.zeros(out_transformed[0].dense_shape)+len(toks)-1
+                    t_res = np.zeros(out_transformed[0].dense_shape)+len(toks)-1
                     for ii in range(len(out_transformed[0].values)):
                         x,y = out_transformed[0].indices[ii]
-                        res[x,y] = out_transformed[0].values[ii]
+                        t_res[x,y] = out_transformed[0].values[ii]
 
                     # Here we print the strings that are recognized.
-                    res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
-                    print("Reduced:"+"\n".join(res))
+                    t_res = ["".join(toks[int(x)] for x in y).replace("-","") for y in t_res]
+                    print("Reduced:\n"+"\n".join(t_res))
                     
                     # And here we print the argmax of the alignment.
-                    res2 = np.argmax(logits_transformed,axis=2).T
-                    res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
-                    print("Orig:"+"\n".join(res2))
+                    t_res2 = np.argmax(logits_transformed,axis=2).T
+                    t_res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(t_res2,lengths)]
+                    print("Orig:\n"+"\n".join(t_res2))
 
             feed_dict = {
                 self.th: th_batch,
@@ -410,7 +410,7 @@ class Attack:
                 # should record our progress and decrease the
                 # rescale constant.
 
-                if (self.loss_fn == "QWGCTC" and i%10 == 0 and res[ii] == "".join([toks[x] for x in target[ii]])) \
+                if (self.loss_fn == "QWGCTC" and i%10 == 0 and res[ii] == t_res[ii] and res[ii] == "".join([toks[x] for x in target[ii]])) \
                    or (i == MAX-1 and final_deltas[ii] is None):
                     # Get the current constant
                     rescale = sess.run(self.rescale)
