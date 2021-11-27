@@ -29,7 +29,7 @@ toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 WINDOW_SIZE = 2048
 #0.005 Too small
-MIN_TH = 0.00001
+MIN_TH = 0.000001
 
 class Transform(object):
     """
@@ -494,13 +494,13 @@ def main():
                         required=False, default=100,
                         help="Learning rate for stage 1 optimization")
     parser.add_argument('--lr_stage2', type=int,
-                        required=False, default=1,
+                        required=False, default=10,
                         help="Learning rate for stage 2 optimization")
     parser.add_argument('--iterations_stage1', type=int,
                         required=False, default=1000,
                         help="Maximum number of iterations of stage 1")
     parser.add_argument('--iterations_stage2', type=int,
-                        required=False, default=2000,
+                        required=False, default=3000,
                         help="Maximum number of iterations of stage 2")
     parser.add_argument('--l2penalty', type=float,
                         required=False, default=float('inf'),
@@ -545,7 +545,14 @@ def main():
             lengths.append(len(audio))
 
             if args.finetune is not None:
-                finetune.append(list(wav.read(args.finetune[i])[1]))
+                fs, audio = wav.read(args.finetune[i])
+
+                # Convert
+                if max(audio) < 1:
+                    audio = audio * 32768
+                else:
+                    audio = audio
+                    finetune.append(list(audio))
 
         maxlen = max(map(len,audios))
 
@@ -577,21 +584,25 @@ def main():
                         l2penalty=args.l2penalty,
                         fs = fs,
                         restore_path=args.restore_path)
-        deltas = attack.attack_stage_1(audios,
-                            lengths,
-                            [[toks.index(x) for x in phrase]]*len(audios),
-                            finetune)
         
-        # And now save it to the desired output
-        for i in range(len(args.input)):
-            if args.out is not None:
-                path = args.out[i]
-            else:
-                path = args.outprefix+str(i)+"stage_1_temp.wav"
-            wav.write(path, 16000,
-                        np.array(np.clip(np.round(deltas[i][:lengths[i]]),
-                                        -2**15, 2**15-1),dtype=np.int16))
-            print("Final distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
+        if args.finetune is None:
+            # Do stage 1
+            deltas = attack.attack_stage_1(audios,
+                                lengths,
+                                [[toks.index(x) for x in phrase]]*len(audios))
+            
+            # And now save it to the desired output
+            for i in range(len(args.input)):
+                if args.out is not None:
+                    path = "stage_1_temp" + args.out[i]
+                else:
+                    path = "stage_1_temp" + args.outprefix+str(i)+".wav"
+                wav.write(path, 16000,
+                            np.array(np.clip(np.round(deltas[i][:lengths[i]]),
+                                            -2**15, 2**15-1),dtype=np.int16))
+                print("Final distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
+        else:
+            deltas = finetune
         
         print("stage 2")
         deltas = attack.attack_stage_2(audios,
