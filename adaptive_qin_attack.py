@@ -325,7 +325,8 @@ class Attack:
         # constructor. It works fine as long as you don't call
         # attack() a bunch of times.
 
-        sess.run(tf.variables_initializer([self.delta]))
+        # We don't reinitialize delta
+        # sess.run(tf.variables_initializer([self.delta]))
         sess.run(self.original.assign(np.array(audio)))
         sess.run(self.lengths.assign((np.array(lengths)-1)//320))
         sess.run(self.mask.assign(np.array([[1 if i < l else 0 for i in range(self.max_audio_len)] for l in lengths])))
@@ -334,7 +335,8 @@ class Attack:
         sess.run(self.target_phrase.assign(np.array([list(t)+[0]*(self.phrase_length-len(t)) for t in target])))
         c = np.ones((self.batch_size, self.phrase_length))
         sess.run(self.importance.assign(c))
-        sess.run(self.rescale.assign(np.ones((self.batch_size,1))))
+        # We don't reinitialize rescale
+        # sess.run(self.rescale.assign(np.ones((self.batch_size,1))))
         sess.run(tf.assign(self.alpha, np.ones((self.batch_size), dtype=np.float32) * MIN_TH))
 
         # Here we'll keep track of the best solution we've found so far
