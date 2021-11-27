@@ -29,7 +29,7 @@ toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 WINDOW_SIZE = 2048
 #0.005 Too small
-MIN_TH = 0.0
+MIN_TH = 0.00001
 
 class Transform(object):
     """
