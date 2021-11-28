@@ -28,7 +28,7 @@ def main():
         for line in lines:
             splitted = line.split(',')
             wav_file_name = splitted[0]
-            transcript = splitted[-1]
+            transcript = splitted[-1].strip()
             if wav_file_name not in wav_files_sampled:
                 target_transcript.append(transcript)
             else:

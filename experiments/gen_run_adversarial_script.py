@@ -8,7 +8,7 @@ import stat
 random.seed(10)
 
 # Example usages:
-# python gen_adversarial_examples.py [input folder] [output folder] [restore model] [gen_script_loc] [batch_size] 
+# python gen_adversarial_examples.py [input folder] [output folder] [restore model] [gen_script_name] [batch_size] 
 # 
 # Script example:
 # python adaptive_qin_attack.py --in sample-000000.wav --target "this is a test" --out adv_test.wav --restore_path DeepSpeech/deepspeech-0.4.1-checkpoint/model.v0.4.1
@@ -23,7 +23,7 @@ def main():
     input_folder = sys.argv[1]
     output_folder = sys.argv[2]
     restore_model_path = sys.argv[3]
-    gen_script_loc = sys.argv[4]
+    gen_script_name = sys.argv[4]
     batch_size = int(sys.argv[5])
 
     wav_files = []
@@ -47,7 +47,7 @@ def main():
         os.makedirs(output_folder)
 
     output_script_content = ""
-    with open(gen_script_loc,'w') as file:
+    with open(gen_script_name,'w') as file:
         content = ""
         for batch_i in range(math.ceil(len(wav_files)*1.0/batch_size)):
             content += "python simple_cw_attack "
@@ -72,11 +72,9 @@ def main():
             content += restore_model_path
             content += "\n"
             content += "wait\n"
-
-    with open(os.path.join(output_folder, 'labels.csv'),'w') as file:
         file.write(output_script_content)
-
-    st = os.stat('somefile')
-    os.chmod(os.path.join(output_folder, 'labels.csv'), st.st_mode | stat.S_IEXEC)    
+    
+    st = os.stat(gen_script_name)
+    os.chmod(gen_script_name, st.st_mode | stat.S_IEXEC)    
 
 main()
