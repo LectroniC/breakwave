@@ -34,9 +34,9 @@ def main():
         for line in lines:
             splitted = line.split(',')
             print(splitted)
-            wav_file_name = splitted[0]
-            target_transcript = splitted[-1]
-            orig_transcript = splitted[-2]
+            wav_file_name = splitted[0].strip()
+            target_transcript = splitted[-1].strip()
+            orig_transcript = splitted[-2].strip()
 
             wav_files.append(wav_file_name)
             orig_transcripts.append(orig_transcript)

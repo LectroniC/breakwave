@@ -49,7 +49,7 @@ def main():
             if splitted[0] in wav_files_sampled:
                 output_label_csv_content += orig_label_csv_lines[i].strip()
                 output_label_csv_content += ","
-                output_label_csv_content += target_transcript[i]
+                output_label_csv_content += target_transcript[i].strip()
                 output_label_csv_content += "\n"
                 shutil.copy(os.path.join(input_folder, splitted[0]), 
                             os.path.join(output_folder, splitted[0]))
