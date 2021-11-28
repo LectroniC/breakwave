@@ -42,13 +42,8 @@ def main():
             orig_transcripts.append(orig_transcript)
             target_transcripts.append(target_transcript)
 
-
-    if not os.path.isdir(output_folder):
-        os.makedirs(output_folder)
-
-    output_script_content = ""
     with open(gen_script_name,'w') as file:
-        content = ""
+        content = "#!/bin/sh\n"
         for batch_i in range(math.ceil(len(wav_files)*1.0/batch_size)):
             content += "python simple_cw_attack "
             content += "--in "
@@ -72,7 +67,7 @@ def main():
             content += restore_model_path
             content += "\n"
             content += "wait\n"
-        file.write(output_script_content)
+        file.write(content)
     
     st = os.stat(gen_script_name)
     os.chmod(gen_script_name, st.st_mode | stat.S_IEXEC)    
