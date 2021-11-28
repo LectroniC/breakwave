@@ -48,6 +48,7 @@ def main():
         for batch_i in range(math.ceil(len(wav_files)*1.0/batch_size)):
             content += "python {} ".format(use_script_name)
             content += "--in "
+            curr_batch_size = min(len(wav_files)-batch_i*batch_size, batch_size)
             for j in range(batch_size):
                 content += wav_files[batch_i*batch_size+j]
                 content += " "
