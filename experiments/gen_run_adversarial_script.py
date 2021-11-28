@@ -50,7 +50,7 @@ def main():
             content += "--in "
             curr_batch_size = min(len(wav_files)-batch_i*batch_size, batch_size)
             for j in range(curr_batch_size):
-                content += wav_files[batch_i*batch_size+j]
+                content += os.path.abspath(os.path.join(input_folder, wav_files[batch_i*batch_size+j]))
                 content += " "
             content += "--target "
             for j in range(curr_batch_size):
