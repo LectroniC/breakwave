@@ -33,6 +33,7 @@ def main():
         lines = file.readlines()
         for line in lines:
             splitted = line.split(',')
+            print(splitted)
             wav_file_name = splitted[0]
             target_transcript = splitted[-1]
             orig_transcript = splitted[-2]
