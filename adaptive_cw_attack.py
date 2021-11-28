@@ -166,7 +166,7 @@ class Attack:
         
         # We'll make a bunch of iterations of gradient descent here
         now = time.time()
-        MAX = self.num_iterations_stage1
+        MAX = self.num_iterations
         for i in range(MAX):
             iteration = i
             now = time.time()
