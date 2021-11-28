@@ -53,7 +53,7 @@ def main():
             content += "--target "
             for j in range(batch_size):
                 content += '"'
-                content += target_transcript[batch_i*batch_size+j]
+                content += target_transcripts[batch_i*batch_size+j]
                 content += '"'
                 content += " "
             content += "--out "
@@ -61,7 +61,7 @@ def main():
                 content += "adv_"+wav_files[batch_i*batch_size+j]
                 content += " "
             content += "--summary_csv "
-            content += '"summary_{}.csv"'.format(batch_i)
+            content += 'summary_{}.csv'.format(batch_i)
             content += " "
             content += "--restore_path "
             content += restore_model_path
