@@ -53,11 +53,13 @@ def main():
                 content += os.path.abspath(os.path.join(input_folder, wav_files[batch_i*batch_size+j]))
                 content += " "
             content += "--target "
-            for j in range(curr_batch_size):
-                content += '"'
-                content += target_transcripts[batch_i*batch_size+j]
-                content += '"'
-                content += " "
+            
+            # We only take one target for a whole batch.
+            content += '"'
+            content += target_transcripts[batch_i*batch_size]
+            content += '"'
+            content += " "
+            
             content += "--out "
             for j in range(curr_batch_size):
                 content += "adv_"+wav_files[batch_i*batch_size+j]
