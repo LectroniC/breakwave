@@ -49,17 +49,17 @@ def main():
             content += "python {} ".format(use_script_name)
             content += "--in "
             curr_batch_size = min(len(wav_files)-batch_i*batch_size, batch_size)
-            for j in range(batch_size):
+            for j in range(curr_batch_size):
                 content += wav_files[batch_i*batch_size+j]
                 content += " "
             content += "--target "
-            for j in range(batch_size):
+            for j in range(curr_batch_size):
                 content += '"'
                 content += target_transcripts[batch_i*batch_size+j]
                 content += '"'
                 content += " "
             content += "--out "
-            for j in range(batch_size):
+            for j in range(curr_batch_size):
                 content += "adv_"+wav_files[batch_i*batch_size+j]
                 content += " "
             content += "--summary_csv "
