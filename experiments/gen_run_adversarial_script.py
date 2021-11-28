@@ -8,7 +8,7 @@ import stat
 random.seed(10)
 
 # Example usages:
-# python gen_adversarial_examples.py [input folder] [output folder] [restore model] [gen_script_name] [batch_size] 
+# python gen_adversarial_examples.py [use_script_name] [input folder] [output folder] [restore model] [gen_script_name] [batch_size] 
 # 
 # Script example:
 # python adaptive_qin_attack.py --in sample-000000.wav --target "this is a test" --out adv_test.wav --restore_path DeepSpeech/deepspeech-0.4.1-checkpoint/model.v0.4.1
@@ -16,15 +16,16 @@ random.seed(10)
 # python .... 
 
 def main():
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 7:
         print("Number of arguments are wrong")
         exit()
     
-    input_folder = sys.argv[1]
-    output_folder = sys.argv[2]
-    restore_model_path = sys.argv[3]
-    gen_script_name = sys.argv[4]
-    batch_size = int(sys.argv[5])
+    use_script_name = sys.argv[1]
+    input_folder = sys.argv[2]
+    output_folder = sys.argv[3]
+    restore_model_path = sys.argv[4]
+    gen_script_name = sys.argv[5]
+    batch_size = int(sys.argv[6])
 
     wav_files = []
     orig_transcripts = []
@@ -45,7 +46,7 @@ def main():
     with open(gen_script_name,'w') as file:
         content = "#!/bin/sh\n"
         for batch_i in range(math.ceil(len(wav_files)*1.0/batch_size)):
-            content += "python simple_cw_attack "
+            content += "python {} ".format(use_script_name)
             content += "--in "
             for j in range(batch_size):
                 content += wav_files[batch_i*batch_size+j]
