@@ -21,6 +21,8 @@ def main():
     wav_files = [f for f in os.listdir(input_folder) if '.wav' in f and os.path.isfile(os.path.join(input_folder, f))]
     wav_files_sampled = random.sample(wav_files, number_of_samples)
     target_transcript = []
+    orig_label_csv_lines = []
+
     with open(os.path.join(input_folder, 'labels.csv'),'r') as file:
         lines = file.readlines()
         for line in lines:
@@ -29,6 +31,8 @@ def main():
             transcript = splitted[-1]
             if wav_file_name not in wav_files_sampled:
                 target_transcript.append(transcript)
+            else:
+                orig_label_csv_lines.append(line)
     
     target_transcript = random.sample(target_transcript, number_of_samples)
 
@@ -40,10 +44,10 @@ def main():
 
     with open(os.path.join(input_folder, 'labels.csv'),'r') as file:
         lines = file.readlines()
-        for i in range(len(lines)):
-            splitted = lines[i].split(',')
+        for i in range(len(orig_label_csv_lines)):
+            splitted = orig_label_csv_lines[i].split(',')
             if splitted[0] in wav_files_sampled:
-                output_label_csv_content += lines[i].strip()
+                output_label_csv_content += orig_label_csv_lines[i].strip()
                 output_label_csv_content += ","
                 output_label_csv_content += target_transcript[i]
                 output_label_csv_content += "\n"
