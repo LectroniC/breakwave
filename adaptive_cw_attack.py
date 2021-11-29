@@ -302,7 +302,7 @@ def main():
                         required=False, default=100,
                         help="Learning rate for optimization")
     parser.add_argument('--iterations', type=int,
-                        required=False, default=5000,
+                        required=False, default=3000,
                         help="Maximum number of iterations of gradient descent")
     parser.add_argument('--l2penalty', type=float,
                         required=False, default=float('inf'),
