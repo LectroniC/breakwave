@@ -429,7 +429,7 @@ class Attack:
             print("i: {}".format(iteration))
             print("stage 2 cl_1 %.3f"%np.mean(cl_1), "\t", "\t".join("%.3f"%x for x in cl_1))
             print("stage 2 cl_2 %.3f"%np.mean(cl_2), "\t", "\t".join("%.3f"%x for x in cl_2))
-            print("stage 2 l_th %.3f"%np.mean(l_th), "\t", "\t".join("%.3f"%x for x in l_th))
+            print("stage 2 l_th %f"%np.mean(l_th), "\t", "\t".join("%f"%x for x in l_th))
             print("stage 2 alpha %f"%np.mean(alpha), "\t", "\t".join("%f"%x for x in alpha))
 
             for ii in range(self.batch_size):
