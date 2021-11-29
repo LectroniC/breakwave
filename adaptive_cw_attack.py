@@ -172,7 +172,7 @@ class Attack:
             now = time.time()
 
             # Print out some debug information every 10 iterations.
-            if i%100 == 0:
+            if i%10 == 0:
                 new, delta, r_out, r_logits, r_out_transformed, r_logits_transformed = sess.run((self.new_input, self.delta, self.decoded, self.logits, self.decoded_transformed, self.logits_transformed))
                 lst = [(r_out, r_logits, r_out_transformed, r_logits_transformed)]
 

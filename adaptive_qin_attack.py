@@ -230,6 +230,7 @@ class Attack:
                 lst = [(r_out, r_logits, r_out_transformed, r_logits_transformed)]
 
                 for out, logits, out_transformed, logits_transformed in lst:
+                    logged_content = "stage 1"
 
                     print("undefended:\n")
                     chars = out[0].values
@@ -241,11 +242,13 @@ class Attack:
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
                     print("Reduced:\n"+"\n".join(res))
+                    logged_content += "undefended:"+ "\n"+ "Reduced:\n"+"\n".join(res) + "\n"
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
                     print("Orig:\n"+"\n".join(res2))
+                    logged_content += "Orig:\n"+"\n".join(res2) + "\n"
 
                     print("defended:\n")
                     chars = out_transformed[0].values
@@ -257,11 +260,16 @@ class Attack:
                     # Here we print the strings that are recognized.
                     t_res = ["".join(toks[int(x)] for x in y).replace("-","") for y in t_res]
                     print("Reduced:\n"+"\n".join(t_res))
+                    logged_content += "defended:"+ "\n"+ "Reduced:\n"+"\n".join(t_res) + "\n"
                     
                     # And here we print the argmax of the alignment.
                     t_res2 = np.argmax(logits_transformed,axis=2).T
                     t_res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(t_res2,lengths)]
                     print("Orig:\n"+"\n".join(t_res2))
+                    logged_content += "Orig:\n"+"\n".join(t_res2) + "\n"
+
+                    with open("log_file.txt", 'a') as file:
+                        file.write(logged_content)
 
             feed_dict = {}
                 
@@ -362,6 +370,7 @@ class Attack:
                 lst = [(r_out, r_logits, r_out_transformed, r_logits_transformed)]
 
                 for out, logits, out_transformed, logits_transformed in lst:
+                    logged_content = ""
 
                     print("undefended:\n")
                     chars = out[0].values
@@ -373,11 +382,13 @@ class Attack:
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
                     print("Reduced:\n"+"\n".join(res))
+                    logged_content += "undefended:"+ "\n"+ "Reduced:\n"+"\n".join(res) + "\n"
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
                     print("Orig:\n"+"\n".join(res2))
+                    logged_content += "Orig:\n"+"\n".join(res2) + "\n"
 
                     print("defended:\n")
                     chars = out_transformed[0].values
@@ -389,11 +400,16 @@ class Attack:
                     # Here we print the strings that are recognized.
                     t_res = ["".join(toks[int(x)] for x in y).replace("-","") for y in t_res]
                     print("Reduced:\n"+"\n".join(t_res))
+                    logged_content += "defended:"+ "\n"+ "Reduced:\n"+"\n".join(t_res) + "\n"
                     
                     # And here we print the argmax of the alignment.
                     t_res2 = np.argmax(logits_transformed,axis=2).T
                     t_res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(t_res2,lengths)]
                     print("Orig:\n"+"\n".join(t_res2))
+                    logged_content += "Orig:\n"+"\n".join(t_res2) + "\n"
+
+                    with open("log_file.txt", 'a') as file:
+                        file.write(logged_content)
 
             feed_dict = {
                 self.th: th_batch,
