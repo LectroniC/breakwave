@@ -322,23 +322,24 @@ def main():
             wav.write(path, 16000,
                         np.array(np.clip(np.round(deltas[i][:lengths[i]]),
                                         -2**15, 2**15-1),dtype=np.int16))
-            print("Final distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
-            print("Final diff distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]]))-np.max(np.abs(audios[i][:lengths[i]])))
+            print("delta distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
+            print("orig distortion", np.max(np.abs(audios[i][:lengths[i]])))
     
         # Write the summary out
         with open(args.summary_csv,'a') as file:
             content = ""
             for i in range(len(args.input)):
                 print(str(i)+':')
-                final_distortion = np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]]))
-                final_diff_distortion = np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]]))-np.max(np.abs(audios[i][:lengths[i]]))
-                diff_db = 20*np.log10(final_diff_distortion)
-                print('diff dB', diff_db)
-                content += str(final_distortion)
+                delta_distortion = np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]]))
+                orig_distortion = np.max(np.abs(audios[i][:lengths[i]]))
+                delta_distortion_db = 20*np.log10(delta_distortion)
+                orig_distortion_db = 20*np.log10(orig_distortion)
+                print('diff dB', delta_distortion_db-orig_distortion_db)
+                content += str(delta_distortion)
                 content += "\n"
-                content += str(final_diff_distortion)
+                content += str(orig_distortion)
                 content += "\n"
-                content += str(diff_db)
+                content += str(delta_distortion_db-orig_distortion_db)
                 content += "\n"
             file.write(content)
 
