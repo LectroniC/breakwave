@@ -650,7 +650,7 @@ def main():
             content = ""
             for i in range(len(args.input)):
                 print(str(i)+':')
-                final_distortion = np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
+                final_distortion = np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]]))
                 final_diff_distortion = np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]]-audios[i][:lengths[i]]))
                 diff_db = 20*np.log10(final_diff_distortion)
                 print('diff dB', diff_db)
