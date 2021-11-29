@@ -177,7 +177,7 @@ class Attack:
         optimizer_stage2 = tf.train.AdamOptimizer(learning_rate_stage2)
         grad21,var21 = optimizer_stage2.compute_gradients(self.loss, [delta])[0]
         grad22,var22 = optimizer_stage2.compute_gradients(self.alpha * self.loss_th, [delta])[0]
-        self.train21 = optimizer_stage2.apply_gradients([(grad21, var21)])
+        self.train21 = optimizer_stage2.apply_gradients([(tf.sign(grad21), var21)])
         self.train22 = optimizer_stage2.apply_gradients([(grad22, var22)])
         self.train2 = tf.group(self.train21, self.train22)
         
