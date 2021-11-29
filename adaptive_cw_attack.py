@@ -172,13 +172,14 @@ class Attack:
             now = time.time()
 
             # Print out some debug information every 10 iterations.
-            if i%10 == 0:
+            if i%100 == 0:
                 new, delta, r_out, r_logits, r_out_transformed, r_logits_transformed = sess.run((self.new_input, self.delta, self.decoded, self.logits, self.decoded_transformed, self.logits_transformed))
                 lst = [(r_out, r_logits, r_out_transformed, r_logits_transformed)]
 
                 for out, logits, out_transformed, logits_transformed in lst:
+                    logged_content = ""
 
-                    print("undefended:\n")
+                    print("undefended:")
                     chars = out[0].values
                     res = np.zeros(out[0].dense_shape)+len(toks)-1
                     for ii in range(len(out[0].values)):
@@ -188,13 +189,15 @@ class Attack:
                     # Here we print the strings that are recognized.
                     res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
                     print("Reduced:\n"+"\n".join(res))
+                    logged_content += "undefended:"+ "\n"+ "Reduced:\n"+"\n".join(res) + "\n"
                     
                     # And here we print the argmax of the alignment.
                     res2 = np.argmax(logits,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
                     print("Orig:\n"+"\n".join(res2))
+                    logged_content += "Orig:\n"+"\n".join(res2) + "\n"
 
-                    print("defended:\n")
+                    print("defended:")
                     chars = out_transformed[0].values
                     t_res = np.zeros(out_transformed[0].dense_shape)+len(toks)-1
                     for ii in range(len(out_transformed[0].values)):
@@ -204,11 +207,16 @@ class Attack:
                     # Here we print the strings that are recognized.
                     t_res = ["".join(toks[int(x)] for x in y).replace("-","") for y in t_res]
                     print("Reduced:\n"+"\n".join(t_res))
+                    logged_content += "defended:"+ "\n"+ "Reduced:\n"+"\n".join(t_res) + "\n"
                     
                     # And here we print the argmax of the alignment.
                     t_res2 = np.argmax(logits_transformed,axis=2).T
                     t_res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(t_res2,lengths)]
                     print("Orig:\n"+"\n".join(t_res2))
+                    logged_content += "Orig:\n"+"\n".join(t_res2) + "\n"
+
+                    with open("log_file.txt", 'a') as file:
+                        file.write(logged_content)
 
             feed_dict = {}
                 
@@ -256,9 +264,9 @@ class Attack:
 
                     # Just for debugging, save the adversarial example
                     # to /tmp so we can see it if we want
-                    wav.write("/tmp/adv.wav", 16000,
-                              np.array(np.clip(np.round(new_input[ii]),
-                                               -2**15, 2**15-1),dtype=np.int16))
+                    # wav.write("/tmp/adv.wav", 16000,
+                    #           np.array(np.clip(np.round(new_input[ii]),
+                    #                            -2**15, 2**15-1),dtype=np.int16))
 
         return final_deltas
     

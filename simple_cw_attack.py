@@ -151,6 +151,8 @@ class Attack:
             iteration = i
             now = time.time()
 
+            feed_dict = {}
+
             # Print out some debug information every 10 iterations.
             if i%10 == 0:
                 new, delta, r_out, r_logits = sess.run((self.new_input, self.delta, self.decoded, self.logits))
@@ -173,10 +175,6 @@ class Attack:
                     res2 = np.argmax(logits,axis=2).T
                     res2 = ["".join(toks[int(x)] for x in y[:(l-1)//320]) for y,l in zip(res2,lengths)]
                     print("\n".join(res2))
-
-
-            else:
-                feed_dict = {}
                 
             # Actually do the optimization ste
             d, el, cl, l, logits, new_input, _ = sess.run((self.delta, self.expanded_loss,

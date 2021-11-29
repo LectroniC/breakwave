@@ -309,9 +309,9 @@ class Attack:
 
                     # Just for debugging, save the adversarial example
                     # to /tmp so we can see it if we want
-                    wav.write("/tmp/adv.wav", 16000,
-                              np.array(np.clip(np.round(new_input[ii]),
-                                               -2**15, 2**15-1),dtype=np.int16))
+                    # wav.write("/tmp/adv.wav", 16000,
+                    #           np.array(np.clip(np.round(new_input[ii]),
+                    #                            -2**15, 2**15-1),dtype=np.int16))
 
         return final_deltas
     
