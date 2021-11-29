@@ -326,7 +326,7 @@ def main():
             print("orig distortion", np.max(np.abs(audios[i][:lengths[i]])))
     
         # Write the summary out
-        with open(args.summary_csv,'a') as file:
+        with open(args.summary_csv,'w') as file:
             content = ""
             for i in range(len(args.input)):
                 print(str(i)+':')

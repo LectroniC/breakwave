@@ -520,7 +520,7 @@ def main():
                         required=False, default=2000,
                         help="Maximum number of iterations of stage 1")
     parser.add_argument('--iterations_stage2', type=int,
-                        required=False, default=4000,
+                        required=False, default=5000,
                         help="Maximum number of iterations of stage 2")
     parser.add_argument('--l2penalty', type=float,
                         required=False, default=float('inf'),
@@ -646,7 +646,7 @@ def main():
             print("orig distortion", np.max(np.abs(audios[i][:lengths[i]])))
     
         # Write the summary out
-        with open(args.summary_csv,'a') as file:
+        with open(args.summary_csv,'w') as file:
             content = ""
             for i in range(len(args.input)):
                 print(str(i)+':')
