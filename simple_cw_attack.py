@@ -184,6 +184,7 @@ class Attack:
                                                           feed_dict)
                     
             # Report progress
+            print("i: {}".format(iteration))
             print("%.3f"%np.mean(cl), "\t", "\t".join("%.3f"%x for x in cl))
 
             logits = np.argmax(logits,axis=2).T

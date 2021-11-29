@@ -229,6 +229,7 @@ class Attack:
                                                           feed_dict)
                     
             # Report progress
+            print("i: {}".format(iteration))
             print("cl_1 %.3f"%np.mean(cl_1), "\t", "\t".join("%.3f"%x for x in cl_1))
             print("cl_2 %.3f"%np.mean(cl_2), "\t", "\t".join("%.3f"%x for x in cl_2))
 

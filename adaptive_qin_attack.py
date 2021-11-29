@@ -28,8 +28,7 @@ import Defender.audioio as audioio
 toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 WINDOW_SIZE = 2048
-#0.005 Too small
-MIN_TH = 0.000001
+MIN_TH = 0.0000001
 
 class Transform(object):
     """
@@ -282,6 +281,7 @@ class Attack:
                                                           feed_dict)
                     
             # Report progress
+            print("i: {}".format(iteration))
             print("stage 1 cl_1 %.3f"%np.mean(cl_1), "\t", "\t".join("%.3f"%x for x in cl_1))
             print("stage 1 cl_2 %.3f"%np.mean(cl_2), "\t", "\t".join("%.3f"%x for x in cl_2))
 
@@ -426,6 +426,7 @@ class Attack:
                                                           feed_dict)
                     
             # Report progress
+            print("i: {}".format(iteration))
             print("stage 2 cl_1 %.3f"%np.mean(cl_1), "\t", "\t".join("%.3f"%x for x in cl_1))
             print("stage 2 cl_2 %.3f"%np.mean(cl_2), "\t", "\t".join("%.3f"%x for x in cl_2))
             print("stage 2 l_th %.3f"%np.mean(l_th), "\t", "\t".join("%.3f"%x for x in l_th))
