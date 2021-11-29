@@ -371,7 +371,7 @@ class Attack:
                 lst = [(r_out, r_logits, r_out_transformed, r_logits_transformed)]
 
                 for out, logits, out_transformed, logits_transformed in lst:
-                    logged_content = ""
+                    logged_content = "stage 2"
 
                     print("undefended:\n")
                     chars = out[0].values
