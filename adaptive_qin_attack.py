@@ -268,8 +268,9 @@ class Attack:
                     print("Orig:\n"+"\n".join(t_res2))
                     logged_content += "Orig:\n"+"\n".join(t_res2) + "\n"
 
-                    with open("log_file.txt", 'a') as file:
-                        file.write(logged_content)
+                    if i%100==0:
+                        with open("log_file.txt", 'a') as file:
+                            file.write(logged_content)
 
             feed_dict = {}
                 
@@ -408,8 +409,9 @@ class Attack:
                     print("Orig:\n"+"\n".join(t_res2))
                     logged_content += "Orig:\n"+"\n".join(t_res2) + "\n"
 
-                    with open("log_file.txt", 'a') as file:
-                        file.write(logged_content)
+                    if i%100==0:
+                        with open("log_file.txt", 'a') as file:
+                            file.write(logged_content)
 
             feed_dict = {
                 self.th: th_batch,
