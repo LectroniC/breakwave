@@ -528,6 +528,9 @@ def main():
     parser.add_argument('--restore_path', type=str,
                         required=True,
                         help="Path to the DeepSpeech checkpoint (ending in model0.4.1)")
+    parser.add_argument('--summary_csv', type=str, 
+                        required=False, default='summary.csv',
+                        help="write the summary to a file")
     args = parser.parse_args()
     while len(sys.argv) > 1:
         sys.argv.pop()
