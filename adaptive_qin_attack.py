@@ -52,7 +52,7 @@ class Transform(object):
 class Attack:
     def __init__(self, sess, loss_fn, phrase_length, max_audio_len,
                  learning_rate_stage1=100, learning_rate_stage2=10, 
-                 num_iterations_stage1=1000, num_iterations_stage2=5000,
+                 num_iterations_stage1=2000, num_iterations_stage2=4000,
                  batch_size=1,
                  fs=None,
                  mp3=False, l2penalty=float('inf'), restore_path=None):
@@ -517,10 +517,10 @@ def main():
                         required=False, default=10,
                         help="Learning rate for stage 2 optimization")
     parser.add_argument('--iterations_stage1', type=int,
-                        required=False, default=1000,
+                        required=False, default=2000,
                         help="Maximum number of iterations of stage 1")
     parser.add_argument('--iterations_stage2', type=int,
-                        required=False, default=5000,
+                        required=False, default=4000,
                         help="Maximum number of iterations of stage 2")
     parser.add_argument('--l2penalty', type=float,
                         required=False, default=float('inf'),
