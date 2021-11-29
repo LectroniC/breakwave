@@ -643,5 +643,23 @@ def main():
                         np.array(np.clip(np.round(deltas[i][:lengths[i]]),
                                         -2**15, 2**15-1),dtype=np.int16))
             print("Final distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
+            print("Final diff distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]]-audios[i][:lengths[i]])))
+    
+        # Write the summary out
+        with open(args.summary_csv,'a') as file:
+            content = ""
+            for i in range(len(args.input)):
+                print(str(i)+':')
+                final_distortion = np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
+                final_diff_distortion = np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]]-audios[i][:lengths[i]]))
+                diff_db = 20*np.log10(final_diff_distortion)
+                print('diff dB', diff_db)
+                content += str(final_distortion)
+                content += "\n"
+                content += str(final_diff_distortion)
+                content += "\n"
+                content += str(diff_db)
+                content += "\n"
+            file.write(content)
 
 main()
