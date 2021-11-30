@@ -198,6 +198,13 @@ class Attack:
                 # if we have (or if it's the final epoch) then we
                 # should record our progress and decrease the
                 # rescale constant.
+
+                delta_distortion = np.max(np.abs(new_input[ii][:lengths[ii]]-audio[ii][:lengths[ii]]))
+                orig_distortion = np.max(np.abs(audio[ii][:lengths[ii]]))
+                delta_distortion_db = 20*np.log10(delta_distortion)
+                orig_distortion_db = 20*np.log10(orig_distortion)
+                print('diff dB', delta_distortion_db-orig_distortion_db)
+
                 if (self.loss_fn == "CTC" and i%10 == 0 and res[ii] == "".join([toks[x] for x in target[ii]])) \
                    or (i == MAX-1 and final_deltas[ii] is None):
                     # Get the current constant
@@ -231,7 +238,7 @@ class Attack:
                     if orig_distortion_db-delta_distortion_db > target_db:
                         if (is_done[ii] == False) and (self.loss_fn == "CTC" and i%10 == 0 and res[ii] == "".join([toks[x] for x in target[ii]])):
                             wav.write(paths[ii], 16000,
-                                        np.array(np.clip(np.round(new_input[i][:lengths[i]]),
+                                        np.array(np.clip(np.round(new_input[ii][:lengths[ii]]),
                                                         -2**15, 2**15-1),dtype=np.int16))
                         is_done[ii] = True
 
