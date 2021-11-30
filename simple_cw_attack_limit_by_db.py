@@ -217,7 +217,8 @@ class Attack:
                     rescale[ii] *= .8
 
                     # Adjust the best solution found so far
-                    final_deltas[ii] = new_input[ii]
+                    if (is_done[ii] == False) or (i == MAX-1 and final_deltas[ii] is None):
+                        final_deltas[ii] = new_input[ii]
 
                     print("Worked i=%d ctcloss=%f bound=%f"%(ii,cl[ii], 2000*rescale[ii][0]))
                     #print('delta',np.max(np.abs(new_input[ii]-audio[ii])))
