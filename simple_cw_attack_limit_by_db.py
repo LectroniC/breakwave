@@ -150,6 +150,9 @@ class Attack:
         now = time.time()
         MAX = self.num_iterations
         for i in range(MAX):
+            if sum(is_done)==self.batch_size:
+                break
+
             iteration = i
             now = time.time()
 
@@ -237,6 +240,7 @@ class Attack:
                     # wav.write("/tmp/adv.wav", 16000,
                     #           np.array(np.clip(np.round(new_input[ii]),
                     #                            -2**15, 2**15-1),dtype=np.int16))
+
 
         return final_deltas, is_done
     
