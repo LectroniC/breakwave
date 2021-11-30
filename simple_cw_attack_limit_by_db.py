@@ -223,8 +223,8 @@ class Attack:
                     sess.run(self.rescale.assign(rescale))
 
 
-                    delta_distortion = np.max(np.abs(new_input[i][:lengths[i]]-audio[i][:lengths[i]]))
-                    orig_distortion = np.max(np.abs(audio[i][:lengths[i]]))
+                    delta_distortion = np.max(np.abs(new_input[ii][:lengths[ii]]-audio[ii][:lengths[ii]]))
+                    orig_distortion = np.max(np.abs(audio[ii][:lengths[ii]]))
                     delta_distortion_db = 20*np.log10(delta_distortion)
                     orig_distortion_db = 20*np.log10(orig_distortion)
                     print('diff dB', delta_distortion_db-orig_distortion_db)
