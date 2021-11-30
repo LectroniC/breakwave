@@ -326,7 +326,7 @@ class Attack:
 
         return final_deltas
     
-    def attack_stage_2(self, audio, lengths, target, finetune=None, th_batch=None, psd_max_batch=None):
+    def attack_stage_2(self, audio, lengths, target, paths, finetune=None, th_batch=None, psd_max_batch=None):
 
         sess = self.sess
 
@@ -354,6 +354,7 @@ class Attack:
         loss_th = [np.inf] * self.batch_size
         final_deltas = [None]*self.batch_size
         final_alpha = [None] * self.batch_size
+        is_done = [False] * self.batch_size
 
         if finetune is not None and len(finetune) > 0:
             sess.run(self.delta.assign(finetune-audio))
@@ -446,6 +447,7 @@ class Attack:
                             loss_th[ii] = l[ii]
                             final_alpha[ii] = alpha[ii]
                             final_deltas[ii] = new_input[ii]
+                            is_done[ii] = True
 
                             rescale = sess.run(self.rescale)
                             if rescale[ii]*2000 > np.max(np.abs(d)):
@@ -464,7 +466,7 @@ class Attack:
                                 "save the best example=%d at iteration= %d, alpha = %f"
                                 % (ii, i, alpha[ii])
                             )
-                            sess.run(self.rescale.assign(rescale))   
+                            sess.run(self.rescale.assign(rescale))
 
                         # increase the alpha each 20 iterations
                         if i % 20 == 0:
@@ -484,7 +486,7 @@ class Attack:
                 if i == MAX-1 and final_deltas[ii] is None:
                     final_deltas[ii] = new_input[ii]
 
-        return final_deltas
+        return final_deltas, is_done
     
 def main():
     """
@@ -543,6 +545,7 @@ def main():
         finetune = []
         audios = []
         lengths = []
+        paths = []
 
         if args.out is None:
             assert args.outprefix is not None
@@ -551,6 +554,13 @@ def main():
             assert len(args.input) == len(args.out)
         if args.finetune is not None and len(args.finetune):
             assert len(args.input) == len(args.finetune)
+        
+        for i in range(len(args.input)):
+            if args.out is not None:
+                path = args.out[i]
+            else:
+                path = args.outprefix+str(i)+".wav"
+            paths.append(path)
         
         # Load the inputs that we're given
         for i in range(len(args.input)):
@@ -631,23 +641,21 @@ def main():
             deltas = finetune
         
         print("stage 2")
-        deltas = attack.attack_stage_2(audios,
-                            lengths,
-                            [[toks.index(x) for x in phrase]]*len(audios),
-                            finetune=deltas,
-                            th_batch=th_batch,
-                            psd_max_batch=psd_max_batch
-                            )
+        deltas, is_done = attack.attack_stage_2(audios,
+                                                lengths,
+                                                [[toks.index(x) for x in phrase]]*len(audios),
+                                                paths,
+                                                finetune=deltas,
+                                                th_batch=th_batch,
+                                                psd_max_batch=psd_max_batch
+                                                )
 
         # And now save it to the desired output
         for i in range(len(args.input)):
-            if args.out is not None:
-                path = args.out[i]
-            else:
-                path = args.outprefix+str(i)+".wav"
-            wav.write(path, 16000,
-                        np.array(np.clip(np.round(deltas[i][:lengths[i]]),
-                                        -2**15, 2**15-1),dtype=np.int16))
+            print(str(i)+':')
+            wav.write(paths[i], 16000,
+                                np.array(np.clip(np.round(deltas[i][:lengths[i]]),
+                                                -2**15, 2**15-1),dtype=np.int16))
             print("delta distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
             print("orig distortion", np.max(np.abs(audios[i][:lengths[i]])))
     
@@ -666,6 +674,8 @@ def main():
                 content += str(orig_distortion)
                 content += "\n"
                 content += str(delta_distortion_db-orig_distortion_db)
+                content += "\n"
+                content += str(is_done[i])
                 content += "\n"
             file.write(content)
 

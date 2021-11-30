@@ -8,7 +8,7 @@ import stat
 random.seed(10)
 
 # Example usages:
-# python gen_adversarial_examples.py [use_script_name] [input folder] [output folder] [restore model] [gen_script_name] [batch_size] 
+# python gen_adversarial_examples.py [use_script_name] [input folder] [new labels csv] [restore model] [gen_script_name] [batch_size] 
 # 
 # Script example:
 # python adaptive_qin_attack.py --in sample-000000.wav --target "this is a test" --out adv_test.wav --restore_path DeepSpeech/deepspeech-0.4.1-checkpoint/model.v0.4.1
@@ -22,7 +22,7 @@ def main():
     
     use_script_name = sys.argv[1]
     input_folder = sys.argv[2]
-    output_folder = sys.argv[3]
+    new_labels_csv = sys.argv[3]
     restore_model_path = sys.argv[4]
     gen_script_name = sys.argv[5]
     batch_size = int(sys.argv[6])
@@ -30,6 +30,7 @@ def main():
     wav_files = []
     orig_transcripts = []
     target_transcripts = []
+    new_target_transcripts = []
     with open(os.path.join(input_folder, 'labels.csv'),'r') as file:
         lines = file.readlines()
         for line in lines:
@@ -57,6 +58,8 @@ def main():
             # We only take one target for a whole batch.
             content += '"'
             content += target_transcripts[batch_i*batch_size]
+            for _ in range(curr_batch_size):
+                new_target_transcripts.append(target_transcripts[batch_i*batch_size])
             content += '"'
             content += " "
             
@@ -75,5 +78,16 @@ def main():
     
     st = os.stat(gen_script_name)
     os.chmod(gen_script_name, st.st_mode | stat.S_IEXEC)    
+
+
+    with open(new_labels_csv,'w') as file:
+        content = ""
+        for i in range(len(lines)):
+            splitted = lines[i].split(',')
+            splitted = [i.strip() for i in splitted]
+            splitted[-1] = new_target_transcripts[i]
+            content += ",".join(splitted)
+            content += "\n"
+        file.write(content)
 
 main()
