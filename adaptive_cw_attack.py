@@ -169,8 +169,6 @@ class Attack:
         now = time.time()
         MAX = self.num_iterations
         for i in range(MAX):
-            if sum(is_done)==self.batch_size:
-                break
             iteration = i
             now = time.time()
 
