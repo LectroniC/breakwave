@@ -1,4 +1,4 @@
-## classify.py -- actually classify a sequence with DeepSpeech
+## randomized_smoothing_classify.py -- actually classify a sequence with DeepSpeech with randomized smoothing
 ##
 ## Copyright (C) 2017, Nicholas Carlini <nicholas@carlini.com>.
 ##
