@@ -383,7 +383,7 @@ def main():
 
         # And now save it to the desired output
         for i in range(len(args.input)):
-            wav.write(path, 16000,
+            wav.write(paths[i], 16000,
                         np.array(np.clip(np.round(deltas[i][:lengths[i]]),
                                         -2**15, 2**15-1),dtype=np.int16))
             print("delta distortion", np.max(np.abs(deltas[i][:lengths[i]]-audios[i][:lengths[i]])))
