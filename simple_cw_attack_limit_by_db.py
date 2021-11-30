@@ -281,7 +281,7 @@ def main():
                         required=False, default='summary.csv',
                         help="write the summary to a file")
     parser.add_argument('--target_db', type=int, 
-                        required=False, default=30,
+                        required=False, default=40,
                         help="target_db to limit the perturbation")
 
     args = parser.parse_args()
