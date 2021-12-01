@@ -29,7 +29,7 @@ toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 class Attack:
     def __init__(self, sess, loss_fn, phrase_length, max_audio_len,
-                 learning_rate=100, num_iterations=3000, batch_size=1,
+                 learning_rate=100, num_iterations=5000, batch_size=1,
                  fs=None,
                  mp3=False, l2penalty=float('inf'), restore_path=None):
         """
@@ -308,7 +308,7 @@ def main():
                         required=False, default=100,
                         help="Learning rate for optimization")
     parser.add_argument('--iterations', type=int,
-                        required=False, default=3000,
+                        required=False, default=5000,
                         help="Maximum number of iterations of gradient descent")
     parser.add_argument('--l2penalty', type=float,
                         required=False, default=float('inf'),
