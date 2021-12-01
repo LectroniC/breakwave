@@ -138,11 +138,11 @@ def main():
             decoded_list.append(r)
 
     predictions = []
-    predictions.extend(d[0][1] for d in decoded_list)
+    predictions.extend(["".join([toks[x] for x in d[0].values])] for d in decoded_list)
 
     # Todo: Fix this
     ground_truths = []
-    ground_truths.extend([toks[x] for x in r[0].values] for l in df['transcript'])
+    ground_truths.extend([l] for l in df['transcript'])
 
     distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
     wer, samples = calculate_report(ground_truths, predictions, distances)
