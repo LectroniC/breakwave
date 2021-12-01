@@ -90,58 +90,64 @@ def main():
     parser.add_argument('--smooth_type', type=str,
                         required=True,
                         help="smoothing type: mean, median, majority")
-    parser.add_argument('--test_files', type-str,
+    parser.add_argument('--labels_csv', type=str,
                         required=True,
-                        help='test files listed in a csv file')
+                        help='location for labels.csv')
+    parser.add_argument('--input_folder', type=str,
+                        required=True,
+                        help='location for the folder of the wav files')
     args = parser.parse_args()
 
 
-    df = pd.read_csv(args.test_files)
-
     decoded_list = []
     final_logits_list = []
+    transcripts = []
     
-    for row in df.iterrows():
-        test_audio_path = row['wav_filename']
-        with tf.Session() as sess:
-            # if args.input.split(".")[-1] == 'mp3':
-            if test_audio_path.split(".")[-1] == 'mp3':
-                # raw = pydub.AudioSegment.from_mp3(args.input)
-                raw = pydub.AudioSegment.from_mp3(test_audio_path)
-                audio = np.array([struct.unpack("<h", raw.raw_data[i:i+2])[0] for i in range(0,len(raw.raw_data),2)])
-            # elif args.input.split(".")[-1] == 'wav':
-            elif test_audio_path.split(".")[-1] == 'wav':
-                _, audio = wav.read(test_audio_path)
-            else:
-                raise Exception("Unknown file format")
-            N = len(audio)
-            print(audio.shape)
-            np.set_printoptions(threshold=sys.maxsize)
-            print(audio)
-            new_input = tf.placeholder(tf.float32, [1, N])
-            lengths = tf.placeholder(tf.int32, [1])
+    with open(args.labels_csv,'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            test_audio_path = lines.split(',')[0].strip()
+            test_audio_path = os.path.join(args.input_folder, test_audio_path)
+            transcripts.append(lines.split(',')[-2].strip())
+            with tf.Session() as sess:
+                # if args.input.split(".")[-1] == 'mp3':
+                if test_audio_path.split(".")[-1] == 'mp3':
+                    # raw = pydub.AudioSegment.from_mp3(args.input)
+                    raw = pydub.AudioSegment.from_mp3(test_audio_path)
+                    audio = np.array([struct.unpack("<h", raw.raw_data[i:i+2])[0] for i in range(0,len(raw.raw_data),2)])
+                # elif args.input.split(".")[-1] == 'wav':
+                elif test_audio_path.split(".")[-1] == 'wav':
+                    _, audio = wav.read(test_audio_path)
+                else:
+                    raise Exception("Unknown file format")
+                N = len(audio)
+                print(audio.shape)
+                np.set_printoptions(threshold=sys.maxsize)
+                print(audio)
+                new_input = tf.placeholder(tf.float32, [1, N])
+                lengths = tf.placeholder(tf.int32, [1])
 
-            with tf.variable_scope("", reuse=tf.AUTO_REUSE):
-                logits = get_logits_smooth(new_input, lengths, args.smooth_sigma, args.sample_num, args.smooth_type)
+                with tf.variable_scope("", reuse=tf.AUTO_REUSE):
+                    logits = get_logits_smooth(new_input, lengths, args.smooth_sigma, args.sample_num, args.smooth_type)
 
-            saver = tf.train.Saver()
-            saver.restore(sess, args.restore_path)
+                saver = tf.train.Saver()
+                saver.restore(sess, args.restore_path)
 
-            decoded, _ = tf.nn.ctc_beam_search_decoder(logits, lengths, merge_repeated=False, beam_width=500)
+                decoded, _ = tf.nn.ctc_beam_search_decoder(logits, lengths, merge_repeated=False, beam_width=500)
 
-            print('logits shape', logits.shape)
-            length = (len(audio)-1)//320
-            l = len(audio)
-            final_logits, r = sess.run(logits, decoded, {new_input: [audio],
-                                   lengths: [length]})
-            final_logits_list.append(final_logits)
-            decoded_list.append(r)
+                print('logits shape', logits.shape)
+                length = (len(audio)-1)//320
+                l = len(audio)
+                final_logits, r = sess.run(logits, decoded, {new_input: [audio],
+                                    lengths: [length]})
+                final_logits_list.append(final_logits)
+                decoded_list.append(r)
 
     predictions = []
     predictions.extend(["".join([toks[x] for x in d[0].values])] for d in decoded_list)
 
     ground_truths = []
-    ground_truths.extend([l] for l in df['transcript'])
+    ground_truths.extend([l] for l in transcripts)
 
     distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
     wer, samples = calculate_report(ground_truths, predictions, distances)
