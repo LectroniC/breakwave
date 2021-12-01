@@ -142,11 +142,11 @@ def get_logits_smooth(new_input, length, smooth_sigma, sample_num, smooth_type, 
         new_logits_ls.append(new_logits.eval().tolist()[:original_logits.get_shape()[0]])
     new_logits_ls_np = np.array(new_logits_ls)
     if smooth_type == 'mean':
-        logits_smooth = tf.convert_to_tensor(new_logits_ls_np.mean())
+        logits_smooth = tf.convert_to_tensor(np.mean(new_logits_ls_np, axis=0))
     elif smooth_type == 'median':
-        logits_smooth = tf.convert_to_tensor(new_logits_ls_np.median())
+        logits_smooth = tf.convert_to_tensor(np.median(new_logits_ls_np, axis=0))
     elif smooth_type == 'majority':
-        logits_smooth = tf.convert_to_tensor(np.array(stats.mode(new_logits_ls_np)[0]))
+        logits_smooth = tf.convert_to_tensor(np.array(stats.mode(new_logits_ls_np, axis=0)[0]))
     else:
         raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
 
