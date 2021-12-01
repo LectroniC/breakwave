@@ -18,6 +18,7 @@ import sys
 from collections import namedtuple
 sys.path.append("DeepSpeech")
 import DeepSpeech
+import pandas as pd
 
 try:
     import pydub
@@ -27,15 +28,28 @@ except:
 
 from tf_logits import get_logits, get_logits_smooth
 
-from util.config import Config, initialize_globals
-from util.preprocess import pmap, preprocess
-from util.text import Alphabet, ctc_label_dense_to_sparse, wer, levenshtein
-
+from DeepSpeech.util.config import Config, initialize_globals
+from DeepSpeech.util.preprocess import pmap, preprocess
+from DeepSpeech.util.text import Alphabet, ctc_label_dense_to_sparse, wer, levenshtein
+from attrdict import AttrDict
 
 # These are the tokens that we're allowed to use.
 # The - token is special and corresponds to the epsilon
 # value in CTC decoding, and can not occur in the phrase.
 toks = " abcdefghijklmnopqrstuvwxyz'-"
+
+def process_decode_result(item):
+    label, decoding, distance, loss = item
+    sample_wer = wer(label, decoding)
+    return AttrDict({
+        'src': label,
+        'res': decoding,
+        'loss': loss,
+        'distance': distance,
+        'wer': sample_wer,
+        'levenshtein': levenshtein(label.split(), decoding.split()),
+        'label_length': float(len(label.split())),
+    })
 
 def calculate_report(labels, decodings, distances):
     r'''
@@ -59,6 +73,7 @@ def calculate_report(labels, decodings, distances):
 
     return samples_wer, samples
 
+
 def main():
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('--in', type=str, dest="input",
@@ -80,11 +95,13 @@ def main():
                         required=True,
                         help='test files in a csv file')
     args = parser.parse_args()
-    while len(sys.argv) > 1:
-        sys.argv.pop()
+
+
     df = pd.read_csv(args.test_files)
-    logitses = []
-    decodeds = []
+
+    decoded_list = []
+    final_logits_list = []
+    
     for row in df.iterrows():
         test_audio_path = row['wav_filename']
         with tf.Session() as sess:
@@ -112,20 +129,19 @@ def main():
             saver.restore(sess, args.restore_path)
 
             decoded, _ = tf.nn.ctc_beam_search_decoder(logits, lengths, merge_repeated=False, beam_width=500)
-            decodes.append(decoded)
 
             print('logits shape', logits.shape)
             length = (len(audio)-1)//320
             l = len(audio)
-            log, r = sess.run(logits, decoded, {new_input: [audio],
+            final_logits, r = sess.run(logits, decoded, {new_input: [audio],
                                    lengths: [length]})
-            logitses.append(log)
-            decodeds.append(r)
+            final_logits_list.append(final_logits)
+            decoded_list.append(r)
 
     ground_truths = []
     ground_truths.extend(Config.alphabet.decode(l) for l in df['transcript'])
     predictions = []
-    predictions.extend(d[0][1] for d in decodeds)
+    predictions.extend(d[0][1] for d in decoded_list)
 
     distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
     wer, samples = calculate_report(ground_truths, predictions, distances)
@@ -133,12 +149,12 @@ def main():
     print('Test - WER: %f, CER: %f' %
           (wer, mean_edit_distance))
 
-        # print("-"*80)
-        # print("-"*80)
+    # print("-"*80)
+    # print("-"*80)
 
-        # print("Classification:")
-        # print("".join([toks[x] for x in r[0].values]))
-        # print("-"*80)
-        # print("-"*80)
+    # print("Classification:")
+    # print("".join([toks[x] for x in r[0].values]))
+    # print("-"*80)
+    # print("-"*80)
 
 main()
