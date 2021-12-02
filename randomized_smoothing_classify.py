@@ -176,7 +176,7 @@ def main():
                 predictions.append("".join([toks[x] for x in r[0].values]))
                 ground_truths.append(transcripts[-1])
             
-            if args.smooth_type == 'median':
+            elif args.smooth_type == 'median':
                 print("Using smooth type median")
                 raise Exception("Not implemented")
     
