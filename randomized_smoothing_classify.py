@@ -167,7 +167,7 @@ def main():
             sess.close()
 
     predictions = []
-    predictions.extend(["".join([toks[x] for x in d[0].values])] for d in decoded_list)
+    predictions.extend(["".join([toks[x] for x in d[0].values]) for d in decoded_list])
 
     ground_truths = []
     ground_truths.extend([l] for l in transcripts)
