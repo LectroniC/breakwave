@@ -166,7 +166,7 @@ def main():
                 
                 logits_smooth = np.mean(new_logits_ls_np, axis=1, keepdims=True)
                 final_logits_list.append(logits_smooth)
-                final_logits_holder = tf.placeholder(tf.float32, logits.shape)
+                final_logits_holder = tf.placeholder(tf.float32, logits_smooth.shape)
                 final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
                 r = sess.run((final_decoded), {final_logits_holder: logits_smooth, lengths: [length]})
                 decoded_list.append(r)
