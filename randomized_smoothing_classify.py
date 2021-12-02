@@ -158,7 +158,7 @@ def main():
                 # Run beam-search only
                 final_logits_holder = tf.placeholder(tf.float32, [1, N])
                 final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
-                r = sess.run(logits, decoded, {final_logits_holder: [logits_smooth],
+                r = sess.run(final_decoded, {final_logits_holder: [logits_smooth],
                                     lengths: [length]})
                 decoded_list.append(r)
 
