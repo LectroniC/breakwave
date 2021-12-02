@@ -141,16 +141,19 @@ def main():
             length = (len(audio)-1)//320
             l = len(audio)
 
-            new_logits_ls = []
-            for _ in range(args.sample_num):
-                noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape)
-                new_audio = audio + noise
-                output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
-                new_logits_ls.append(output_logits)
-            new_logits_ls_np = np.array(new_logits_ls)
-            print(new_logits_ls_np.shape)
+            
             if args.smooth_type == 'mean':
+
                 print("Using smooth type mean")
+                new_logits_ls = []
+                for _ in range(args.sample_num):
+                    print(max(audio))
+                    print(min(audio))
+                    noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape)
+                    new_audio = audio + noise
+                    output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
+                    new_logits_ls.append(output_logits)
+                new_logits_ls_np = np.array(new_logits_ls)
                 logits_smooth = np.mean(new_logits_ls_np, axis=0)
                 final_logits_list.append(logits_smooth)
                 final_logits_holder = tf.placeholder(tf.float32, logits.shape)
@@ -158,6 +161,7 @@ def main():
                 r = sess.run((final_decoded), {final_logits_holder: logits_smooth, lengths: [length]})
                 decoded_list.append(r)
                 sess.close()
+
             elif args.smooth_type == 'median':
                 print("Using smooth type median")
                 # logits_smooth = np.median(new_logits_ls_np, axis=0)
