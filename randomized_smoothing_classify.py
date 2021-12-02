@@ -148,22 +148,24 @@ def main():
                 output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
                 new_logits_ls.append(output_logits)
             new_logits_ls_np = np.array(new_logits_ls)
+            print(new_logits_ls_np.shape)
             if args.smooth_type == 'mean':
+                print("Using smooth type mean")
                 logits_smooth = np.mean(new_logits_ls_np, axis=0)
+                final_logits_list.append(logits_smooth)
+                final_logits_holder = tf.placeholder(tf.float32, logits.shape)
+                final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
+                r = sess.run((final_decoded), {final_logits_holder: logits_smooth, lengths: [length]})
+                decoded_list.append(r)
+                sess.close()
             elif args.smooth_type == 'median':
-                logits_smooth = np.median(new_logits_ls_np, axis=0)
+                print("Using smooth type median")
+                # logits_smooth = np.median(new_logits_ls_np, axis=0)
+                raise Exception("Not implemented yet")
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
             
-            final_logits_list.append(logits_smooth)
-
-            # Run beam-search only
-            final_logits_holder = tf.placeholder(tf.float32, logits.shape)
-            final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
-            r = sess.run((final_decoded), {final_logits_holder: logits_smooth, lengths: [length]})
-            decoded_list.append(r)
-            sess.close()
-
+            
     predictions = []
     predictions.extend(["".join([toks[x] for x in d[0].values]) for d in decoded_list])
     print(predictions)
