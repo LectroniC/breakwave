@@ -171,9 +171,6 @@ def main():
             elif args.smooth_type == 'vote_by_token':
                 print("Using smooth type vote_by_token")
                 raise Exception("Not implemented")
-            elif args.smooth_type == 'vote_by_word':
-                print("Using smooth vote_by_word")
-                raise Exception("Not implemented")
             elif args.smooth_type == 'vote_by_sentence':
                 curr_predictions = []
                 curr_list_decoded = []
@@ -188,7 +185,7 @@ def main():
                 sess.close()
                 c = Counter(curr_predictions)
                 print(c.items())
-                final_prediction = c.items()[-1][0]
+                final_prediction = c.most_common(1)[0][0]
                 predictions.append(final_prediction)
                 ground_truths.append(transcripts[-1])
             else:
