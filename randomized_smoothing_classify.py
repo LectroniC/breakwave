@@ -170,7 +170,7 @@ def main():
     predictions.extend(["".join([toks[x] for x in d[0].values]) for d in decoded_list])
 
     ground_truths = []
-    ground_truths.extend([l] for l in transcripts)
+    ground_truths.extend([l for l in transcripts])
 
     distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
     wer, samples = calculate_report(ground_truths, predictions, distances)
