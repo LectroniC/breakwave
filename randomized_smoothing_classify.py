@@ -149,7 +149,7 @@ def main():
             if args.smooth_type == 'mean':
                 print("Using smooth type mean")
                 new_logits_ls = []
-                for i in range(args.sample_num/args.batch_size):
+                for i in range(int(args.sample_num/args.batch_size)):
                     print("sampled: "+str(i))
                     batch_audios = []
                     batch_lengths = []
