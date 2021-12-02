@@ -140,9 +140,8 @@ def main():
                 new_logits_ls = []
                 for _ in range(args.sample_num):
                     noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape)
-                    print(noise.shape)
                     new_audio = audio + noise
-                    output_logits, _ = sess.run(logits, decoded, {new_input: [new_audio], lengths: [length]})
+                    output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
                     new_logits_ls.append(output_logits)
                 new_logits_ls_np = np.array(new_logits_ls)
                 if args.smooth_type == 'mean':
@@ -157,7 +156,7 @@ def main():
                 # Run beam-search only
                 final_logits_holder = tf.placeholder(tf.float32, [1, N])
                 final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
-                r = sess.run(final_decoded, {final_logits_holder: [logits_smooth], lengths: [length]})
+                r = sess.run((final_decoded), {final_logits_holder: [logits_smooth], lengths: [length]})
                 decoded_list.append(r)
 
     predictions = []
