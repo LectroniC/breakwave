@@ -173,7 +173,7 @@ def main():
                 decoded_list.append(r)
                 sess.close()
 
-                predictions.append("".join([toks[x] for x in r[0].values]))
+                predictions.append("".join([toks[x] for x in r[0].values]).replace("-",""))
                 ground_truths.append(transcripts[-1])
             
             elif args.smooth_type == 'median':
@@ -203,7 +203,7 @@ def main():
                 decoded_list.append(r)
                 sess.close()
 
-                predictions.append("".join([toks[x] for x in r[0].values]))
+                predictions.append("".join([toks[x] for x in r[0].values]).replace("-",""))
                 ground_truths.append(transcripts[-1])
     
             elif args.smooth_type == 'vote_by_token':
@@ -244,18 +244,24 @@ def main():
                     batch_audios = np.clip(batch_audios, -2**15, 2**15-1)
 
                     _, output_decoded = sess.run((logits, decoded), {new_input: batch_audios, lengths: batch_lengths})
-                    print(len(output_decoded))
-                    print(output_decoded[0].shape)
+
+                    
+                    res = np.zeros(output_decoded[0].dense_shape)+len(toks)-1
+                    for ii in range(len(output_decoded[0].values)):
+                        x,y = output_decoded[0].indices[ii]
+                        res[x,y] = output_decoded[0].values[ii]
+
+                    # Here we print the strings that are recognized.
+                    res = ["".join(toks[int(x)] for x in y).replace("-","") for y in res]
+
                     curr_list_decoded.append(output_decoded)
-                    curr_predictions.append("".join([toks[x] for x in output_decoded[0].values]))
+                    curr_predictions.extend(res)
                 
                 sess.close()
                 c = Counter(curr_predictions)
                 print(c.items())
                 final_prediction = c.most_common(1)[0][0]
                 predictions.append(final_prediction)
-                ground_truths.append(transcripts[-1])
-                predictions.append("".join([toks[x] for x in r[0].values]))
                 ground_truths.append(transcripts[-1])
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
