@@ -161,11 +161,11 @@ def main():
             elif args.smooth_type == 'median':
                 print("Using smooth type median")
                 # logits_smooth = np.median(new_logits_ls_np, axis=0)
-                raise Exception("Not implemented yet")
+                raise Exception("Not implemented")
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
             
-            
+    
     predictions = []
     predictions.extend(["".join([toks[x] for x in d[0].values]) for d in decoded_list])
     print(predictions)
