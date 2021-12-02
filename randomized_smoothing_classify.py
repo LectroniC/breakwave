@@ -244,7 +244,8 @@ def main():
                     batch_audios = np.clip(batch_audios, -2**15, 2**15-1)
 
                     _, output_decoded = sess.run((logits, decoded), {new_input: batch_audios, lengths: batch_lengths})
-                    print(output_decoded.shape)
+                    print(len(output_decoded))
+                    print(output_decoded[0].shape)
                     curr_list_decoded.append(output_decoded)
                     curr_predictions.append("".join([toks[x] for x in output_decoded[0].values]))
                 
