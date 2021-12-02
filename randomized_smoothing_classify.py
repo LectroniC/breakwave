@@ -192,6 +192,8 @@ def main():
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
             
 
+    print(ground_truths)
+    print(predictions)
     distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
     wer, samples = calculate_report(ground_truths, predictions, distances)
     mean_edit_distance = np.mean(distances)
