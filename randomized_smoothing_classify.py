@@ -32,6 +32,8 @@ from util.preprocess import pmap
 from util.text import wer, levenshtein
 from attrdict import AttrDict
 
+from collections import Counter
+
 # These are the tokens that we're allowed to use.
 # The - token is special and corresponds to the epsilon
 # value in CTC decoding, and can not occur in the phrase.
@@ -102,6 +104,8 @@ def main():
     decoded_list = []
     final_logits_list = []
     transcripts = []
+    ground_truths = []
+    predictions = []
     
 
     with open(args.labels_csv,'r') as file:
@@ -150,7 +154,7 @@ def main():
                     noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape) * max(np.abs(audio))
                     new_audio = audio + noise
                     new_audio = np.clip(new_audio, -2**15, 2**15-1)
-                    output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
+                    output_logits = sess.run((logits), {new_input: [new_audio], lengths: [length]})
                     new_logits_ls.append(output_logits)
                 new_logits_ls_np = np.array(new_logits_ls)
                 logits_smooth = np.mean(new_logits_ls_np, axis=0)
@@ -161,6 +165,9 @@ def main():
                 decoded_list.append(r)
                 sess.close()
 
+                predictions.append("".join([toks[x] for x in r[0].values]))
+                ground_truths.append(transcripts[-1])
+
             elif args.smooth_type == 'vote_by_token':
                 print("Using smooth type vote_by_token")
                 raise Exception("Not implemented")
@@ -168,19 +175,25 @@ def main():
                 print("Using smooth vote_by_word")
                 raise Exception("Not implemented")
             elif args.smooth_type == 'vote_by_sentence':
-                print("Using smooth vote_by_sentence")
-                raise Exception("Not implemented")
+                curr_predictions = []
+                curr_list_decoded = []
+                for i in range(args.sample_num):
+                    print("sampled: "+str(i))
+                    noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape) * max(np.abs(audio))
+                    new_audio = audio + noise
+                    new_audio = np.clip(new_audio, -2**15, 2**15-1)
+                    _, output_decoded = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
+                    curr_list_decoded.append(output_decoded)
+                    curr_predictions.append("".join([toks[x] for x in output_decoded[0].values]))
+                sess.close()
+                c = Counter(curr_predictions)
+                print(c.items())
+                final_prediction = c.items()[-1][0]
+                predictions.append(final_prediction)
+                ground_truths.append(transcripts[-1])
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
             
-    
-    predictions = []
-    predictions.extend(["".join([toks[x] for x in d[0].values]) for d in decoded_list])
-    print(predictions)
-
-    ground_truths = []
-    ground_truths.extend([l for l in transcripts])
-    print(ground_truths)
 
     distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
     wer, samples = calculate_report(ground_truths, predictions, distances)
