@@ -162,15 +162,15 @@ def main():
             final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
             r = sess.run((final_decoded), {final_logits_holder: logits_smooth, lengths: [length]})
             decoded_list.append(r)
-            print(logits_smooth)
-            print(r)
             sess.close()
 
     predictions = []
     predictions.extend(["".join([toks[x] for x in d[0].values]) for d in decoded_list])
+    print(predictions)
 
     ground_truths = []
     ground_truths.extend([l for l in transcripts])
+    print(ground_truths)
 
     distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
     wer, samples = calculate_report(ground_truths, predictions, distances)
