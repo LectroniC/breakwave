@@ -146,10 +146,9 @@ def main():
 
                 print("Using smooth type mean")
                 new_logits_ls = []
-                for _ in range(args.sample_num):
-                    print(max(audio))
-                    print(min(audio))
-                    noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape)
+                for i in range(args.sample_num):
+                    print("sampled: "+str(i))
+                    noise = np.random.normal(0.0, args.smooth_sigma * max(np.abs(audio)) , size=audio.shape)
                     new_audio = audio + noise
                     output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
                     new_logits_ls.append(output_logits)
