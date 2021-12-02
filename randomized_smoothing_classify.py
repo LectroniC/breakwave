@@ -158,6 +158,8 @@ def main():
                 final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
                 r = sess.run((final_decoded), {final_logits_holder: [logits_smooth], lengths: [length]})
                 decoded_list.append(r)
+                print(logits_smooth)
+                print(r)
 
     predictions = []
     predictions.extend(["".join([toks[x] for x in d[0].values])] for d in decoded_list)
