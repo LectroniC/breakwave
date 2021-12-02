@@ -109,8 +109,7 @@ def main():
     final_logits_list = []
     transcripts = []
     ground_truths = []
-    first_pass_predictions = []
-    random_pass_predictions = []
+    predictions = []
     
 
     with open(args.labels_csv,'r') as file:
@@ -132,26 +131,6 @@ def main():
             N = len(audio)
             print(audio.shape)
             np.set_printoptions(threshold=sys.maxsize)
-
-            # Get first pass predictions
-            new_input = tf.placeholder(tf.float32, [1, N])
-            lengths = tf.placeholder(tf.int32, [1])
-            with tf.variable_scope("", reuse=tf.AUTO_REUSE):
-                logits = get_logits(new_input, lengths)
-            
-            length = (len(audio)-1)//320
-            l = len(audio)
-            
-            decoded, _ = tf.nn.ctc_beam_search_decoder(logits, lengths, merge_repeated=False, beam_width=500)
-            _, output_decoded = sess.run((logits, decoded), {new_input: [audio], lengths: [length]})
-            first_pass_predictions.append("".join([toks[x] for x in output_decoded[0].values]).replace("-",""))
-            sess.close()
-            #Get first pass ends
-
-            # Get perturbed results
-            tf.reset_default_graph()
-            sess = tf.InteractiveSession()
-
             new_input = tf.placeholder(tf.float32, [args.batch_size, N])
             lengths = tf.placeholder(tf.int32, [args.batch_size])
 
@@ -165,7 +144,7 @@ def main():
 
             print('logits shape', logits.shape)
             length = (len(audio)-1)//320
-            l = len(audio) 
+            l = len(audio)
 
             if args.smooth_type == 'mean':
                 print("Using smooth type mean")
@@ -194,7 +173,7 @@ def main():
                 decoded_list.append(r)
                 sess.close()
 
-                random_pass_predictions.append("".join([toks[x] for x in r[0].values]).replace("-",""))
+                predictions.append("".join([toks[x] for x in r[0].values]).replace("-",""))
                 ground_truths.append(transcripts[-1])
             
             elif args.smooth_type == 'median':
@@ -224,7 +203,7 @@ def main():
                 decoded_list.append(r)
                 sess.close()
 
-                random_pass_predictions.append("".join([toks[x] for x in r[0].values]).replace("-",""))
+                predictions.append("".join([toks[x] for x in r[0].values]).replace("-",""))
                 ground_truths.append(transcripts[-1])
     
             elif args.smooth_type == 'vote_by_token':
@@ -265,19 +244,18 @@ def main():
                 c = Counter(curr_predictions)
                 print(c.items())
                 final_prediction = c.most_common(1)[0][0]
-                random_pass_predictions.append(final_prediction)
+                predictions.append(final_prediction)
                 ground_truths.append(transcripts[-1])
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
             
 
     print(ground_truths)
-    print(first_pass_predictions)
-    print(random_pass_predictions)
-
-    distances = [levenshtein(a, b) for a, b in zip(first_pass_predictions, random_pass_predictions)]
-    wer, samples = calculate_report(first_pass_predictions, random_pass_predictions, distances)
+    print(predictions)
+    distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
+    wer, samples = calculate_report(ground_truths, predictions, distances)
     mean_edit_distance = np.mean(distances)
-    print('Test - WER: %f, CER: %f' % (wer, mean_edit_distance))
+    print('Test - WER: %f, CER: %f' %
+          (wer, mean_edit_distance))
 
 main()
