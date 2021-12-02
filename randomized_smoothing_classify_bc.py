@@ -145,7 +145,6 @@ def main():
             l = len(audio)
 
             if args.smooth_type == 'mean':
-
                 print("Using smooth type mean")
                 new_logits_ls = []
                 for i in range(args.sample_num):
