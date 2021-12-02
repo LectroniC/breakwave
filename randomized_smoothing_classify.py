@@ -122,7 +122,6 @@ def main():
                 N = len(audio)
                 print(audio.shape)
                 np.set_printoptions(threshold=sys.maxsize)
-                print(audio)
                 new_input = tf.placeholder(tf.float32, [1, N])
                 lengths = tf.placeholder(tf.int32, [1])
 
@@ -142,8 +141,7 @@ def main():
                 for _ in range(args.sample_num):
                     noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape)
                     new_audio = audio + noise
-                    output_logits, _ = sess.run(logits, decoded, {new_input: [new_audio],
-                                    lengths: [length]})
+                    output_logits, _ = sess.run(logits, decoded, {new_input: [new_audio], lengths: [length]})
                     new_logits_ls.append(output_logits)
                 new_logits_ls_np = np.array(new_logits_ls)
                 if args.smooth_type == 'mean':
