@@ -102,65 +102,69 @@ def main():
     final_logits_list = []
     transcripts = []
     
+
     with open(args.labels_csv,'r') as file:
         lines = file.readlines()
         for line in lines:
+            tf.reset_default_graph()
+            sess = tf.InteractiveSession()
             test_audio_path = line.split(',')[0].strip()
             test_audio_path = os.path.join(args.input_folder, "adv_"+test_audio_path)
             transcripts.append(line.split(',')[-2].strip())
-            with tf.Session() as sess:
-                # if args.input.split(".")[-1] == 'mp3':
-                if test_audio_path.split(".")[-1] == 'mp3':
-                    # raw = pydub.AudioSegment.from_mp3(args.input)
-                    raw = pydub.AudioSegment.from_mp3(test_audio_path)
-                    audio = np.array([struct.unpack("<h", raw.raw_data[i:i+2])[0] for i in range(0,len(raw.raw_data),2)])
-                # elif args.input.split(".")[-1] == 'wav':
-                elif test_audio_path.split(".")[-1] == 'wav':
-                    _, audio = wav.read(test_audio_path)
-                else:
-                    raise Exception("Unknown file format")
-                N = len(audio)
-                print(audio.shape)
-                np.set_printoptions(threshold=sys.maxsize)
-                new_input = tf.placeholder(tf.float32, [1, N])
-                lengths = tf.placeholder(tf.int32, [1])
 
-                with tf.variable_scope("", reuse=tf.AUTO_REUSE):
-                    logits = get_logits(new_input, lengths)
+            # if args.input.split(".")[-1] == 'mp3':
+            if test_audio_path.split(".")[-1] == 'mp3':
+                # raw = pydub.AudioSegment.from_mp3(args.input)
+                raw = pydub.AudioSegment.from_mp3(test_audio_path)
+                audio = np.array([struct.unpack("<h", raw.raw_data[i:i+2])[0] for i in range(0,len(raw.raw_data),2)])
+            # elif args.input.split(".")[-1] == 'wav':
+            elif test_audio_path.split(".")[-1] == 'wav':
+                _, audio = wav.read(test_audio_path)
+            else:
+                raise Exception("Unknown file format")
+            N = len(audio)
+            print(audio.shape)
+            np.set_printoptions(threshold=sys.maxsize)
+            new_input = tf.placeholder(tf.float32, [1, N])
+            lengths = tf.placeholder(tf.int32, [1])
 
-                saver = tf.train.Saver()
-                saver.restore(sess, args.restore_path)
+            with tf.variable_scope("", reuse=tf.AUTO_REUSE):
+                logits = get_logits(new_input, lengths)
 
-                decoded, _ = tf.nn.ctc_beam_search_decoder(logits, lengths, merge_repeated=False, beam_width=500)
+            saver = tf.train.Saver()
+            saver.restore(sess, args.restore_path)
 
-                print('logits shape', logits.shape)
-                length = (len(audio)-1)//320
-                l = len(audio)
+            decoded, _ = tf.nn.ctc_beam_search_decoder(logits, lengths, merge_repeated=False, beam_width=500)
 
-                new_logits_ls = []
-                for _ in range(args.sample_num):
-                    noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape)
-                    new_audio = audio + noise
-                    output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
-                    new_logits_ls.append(output_logits)
-                new_logits_ls_np = np.array(new_logits_ls)
-                if args.smooth_type == 'mean':
-                    logits_smooth = np.mean(new_logits_ls_np, axis=0)
-                elif args.smooth_type == 'median':
-                    logits_smooth = np.median(new_logits_ls_np, axis=0)
-                else:
-                    raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
-                
-                final_logits_list.append(logits_smooth)
+            print('logits shape', logits.shape)
+            length = (len(audio)-1)//320
+            l = len(audio)
 
-                # Run beam-search only
-                final_logits_holder = tf.placeholder(tf.float32, logits.shape)
-                final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
-                # TODO: Fix here.
-                r = sess.run((final_decoded), {final_logits_holder: logits_smooth, lengths: [length]})
-                decoded_list.append(r)
-                print(logits_smooth)
-                print(r)
+            new_logits_ls = []
+            for _ in range(args.sample_num):
+                noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape)
+                new_audio = audio + noise
+                output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
+                new_logits_ls.append(output_logits)
+            new_logits_ls_np = np.array(new_logits_ls)
+            if args.smooth_type == 'mean':
+                logits_smooth = np.mean(new_logits_ls_np, axis=0)
+            elif args.smooth_type == 'median':
+                logits_smooth = np.median(new_logits_ls_np, axis=0)
+            else:
+                raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
+            
+            final_logits_list.append(logits_smooth)
+
+            # Run beam-search only
+            final_logits_holder = tf.placeholder(tf.float32, logits.shape)
+            final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
+            # TODO: Fix here.
+            r = sess.run((final_decoded), {final_logits_holder: logits_smooth, lengths: [length]})
+            decoded_list.append(r)
+            print(logits_smooth)
+            print(r)
+            sess.close()
 
     predictions = []
     predictions.extend(["".join([toks[x] for x in d[0].values])] for d in decoded_list)
