@@ -140,7 +140,7 @@ def main():
 
                 new_logits_ls = []
                 for _ in range(args.sample_num):
-                    noise = np.random.normal(0.0, args.smooth_sigma, size=tf.shape(audio))
+                    noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape)
                     new_audio = audio + noise
                     output_logits, _ = sess.run(logits, decoded, {new_input: [new_audio],
                                     lengths: [length]})
