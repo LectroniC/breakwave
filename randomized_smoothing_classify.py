@@ -178,28 +178,86 @@ def main():
             
             elif args.smooth_type == 'median':
                 print("Using smooth type median")
-                raise Exception("Not implemented")
+                new_logits_ls_np = np.zeros((logits.shape[0], args.sample_num, logits.shape[2]))
+                for i in range(int(args.sample_num/args.batch_size)):
+                    print("sampled batch: "+str(i))
+
+                    batch_audios = [audio]*args.batch_size
+                    batch_lengths = [length]*args.batch_size
+                    batch_audios = np.array(batch_audios)
+                    batch_lengths = np.array(batch_lengths)
+                    
+                    noise = np.random.normal(0.0, args.smooth_sigma, size=batch_audios.shape) * max(np.abs(audio))
+                    batch_audios = batch_audios + noise
+                    batch_audios = np.clip(batch_audios, -2**15, 2**15-1)
+
+                    output_logits = sess.run((logits), {new_input: batch_audios, lengths: batch_lengths})
+                    new_logits_ls_np[:,i*args.batch_size:(i+1)*args.batch_size,:] = output_logits
+                
+                logits_smooth = np.median(new_logits_ls_np, axis=1, keepdims=True)
+                final_logits_list.append(logits_smooth)
+                final_logits_holder = tf.placeholder(tf.float32, logits_smooth.shape)
+                final_length_holder = tf.placeholder(tf.int32, [1])
+                final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, final_length_holder, merge_repeated=False, beam_width=500)
+                r = sess.run((final_decoded), {final_logits_holder: logits_smooth, final_length_holder: [length]})
+                decoded_list.append(r)
+                sess.close()
+
+                predictions.append("".join([toks[x] for x in r[0].values]))
+                ground_truths.append(transcripts[-1])
     
             elif args.smooth_type == 'vote_by_token':
                 print("Using smooth type vote_by_token")
                 raise Exception("Not implemented")
 
             elif args.smooth_type == 'vote_by_sentence':
+                # curr_predictions = []
+                # curr_list_decoded = []
+                # for i in range(args.sample_num):
+                #     print("sampled: "+str(i))
+                #     noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape) * max(np.abs(audio))
+                #     new_audio = audio + noise
+                #     new_audio = np.clip(new_audio, -2**15, 2**15-1)
+                #     _, output_decoded = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
+                #     curr_list_decoded.append(output_decoded)
+                #     curr_predictions.append("".join([toks[x] for x in output_decoded[0].values]))
+                # sess.close()
+                # c = Counter(curr_predictions)
+                # print(c.items())
+                # final_prediction = c.most_common(1)[0][0]
+                # predictions.append(final_prediction)
+                # ground_truths.append(transcripts[-1])
+
                 curr_predictions = []
                 curr_list_decoded = []
-                for i in range(args.sample_num):
-                    print("sampled: "+str(i))
-                    noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape) * max(np.abs(audio))
-                    new_audio = audio + noise
-                    new_audio = np.clip(new_audio, -2**15, 2**15-1)
-                    _, output_decoded = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
-                    curr_list_decoded.append(output_decoded)
-                    curr_predictions.append("".join([toks[x] for x in output_decoded[0].values]))
+                output_decoded = np.zeros(decoded.shape)
+                print(decoded.shape)
+
+                for i in range(int(args.sample_num/args.batch_size)):
+                    print("sampled batch: "+str(i))
+
+                    batch_audios = [audio]*args.batch_size
+                    batch_lengths = [length]*args.batch_size
+                    batch_audios = np.array(batch_audios)
+                    batch_lengths = np.array(batch_lengths)
+                    
+                    noise = np.random.normal(0.0, args.smooth_sigma, size=batch_audios.shape) * max(np.abs(audio))
+                    batch_audios = batch_audios + noise
+                    batch_audios = np.clip(batch_audios, -2**15, 2**15-1)
+
+                    _, output_decoded = sess.run((logits, decoded), {new_input: batch_audios, lengths: batch_lengths})
+                    new_logits_ls_np[i*args.batch_size:(i+1)*args.batch_size,:] = output_logits
+                
+                logits_smooth = np.median(new_logits_ls_np, axis=1, keepdims=True)
+                final_logits_list.append(logits_smooth)
+                final_logits_holder = tf.placeholder(tf.float32, logits_smooth.shape)
+                final_length_holder = tf.placeholder(tf.int32, [1])
+                final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, final_length_holder, merge_repeated=False, beam_width=500)
+                r = sess.run((final_decoded), {final_logits_holder: logits_smooth, final_length_holder: [length]})
+                decoded_list.append(r)
                 sess.close()
-                c = Counter(curr_predictions)
-                print(c.items())
-                final_prediction = c.most_common(1)[0][0]
-                predictions.append(final_prediction)
+
+                predictions.append("".join([toks[x] for x in r[0].values]))
                 ground_truths.append(transcripts[-1])
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
