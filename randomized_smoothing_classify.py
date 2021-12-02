@@ -75,9 +75,6 @@ def calculate_report(labels, decodings, distances):
 
 def main():
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--in', type=str, dest="input",
-                        required=True,
-                        help="Input audio .wav file(s), at 16KHz (separated by spaces)")
     parser.add_argument('--restore_path', type=str,
                         required=True,
                         help="Path to the DeepSpeech checkpoint (ending in model0.4.1)")
