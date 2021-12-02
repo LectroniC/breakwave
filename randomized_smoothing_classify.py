@@ -148,7 +148,7 @@ def main():
                 new_logits_ls = []
                 for i in range(args.sample_num):
                     print("sampled: "+str(i))
-                    noise = np.random.normal(0.0, args.smooth_sigma * max(np.abs(audio)) , size=audio.shape)
+                    noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape) * max(np.abs(audio))
                     new_audio = audio + noise
                     new_audio = np.clip(new_audio, -2**15, 2**15-1)
                     output_logits, _ = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
