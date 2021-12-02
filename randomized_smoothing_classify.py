@@ -38,12 +38,13 @@ from attrdict import AttrDict
 toks = " abcdefghijklmnopqrstuvwxyz'-"
 
 def process_decode_result(item):
-    label, decoding, distance, loss = item
+    # label, decoding, distance, loss = item
+    label, decoding, distance = item
     sample_wer = wer(label, decoding)
     return AttrDict({
         'src': label,
         'res': decoding,
-        'loss': loss,
+        'loss': None,
         'distance': distance,
         'wer': sample_wer,
         'levenshtein': levenshtein(label.split(), decoding.split()),
@@ -159,7 +160,6 @@ def main():
             # Run beam-search only
             final_logits_holder = tf.placeholder(tf.float32, logits.shape)
             final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
-            # TODO: Fix here.
             r = sess.run((final_decoded), {final_logits_holder: logits_smooth, lengths: [length]})
             decoded_list.append(r)
             print(logits_smooth)
@@ -177,13 +177,5 @@ def main():
     mean_edit_distance = np.mean(distances)
     print('Test - WER: %f, CER: %f' %
           (wer, mean_edit_distance))
-
-    # print("-"*80)
-    # print("-"*80)
-
-    # print("Classification:")
-    # print("".join([toks[x] for x in r[0].values]))
-    # print("-"*80)
-    # print("-"*80)
 
 main()
