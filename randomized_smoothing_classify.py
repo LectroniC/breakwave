@@ -27,9 +27,9 @@ except:
     print("pydub was not loaded, MP3 compression will not work")
 
 from tf_logits import get_logits, get_logits_smooth
-
-from DeepSpeech.util.preprocess import pmap
-from DeepSpeech.util.text import wer, levenshtein
+sys.path.append("DeepSpeech/util")
+from util.preprocess import pmap
+from util.text import wer, levenshtein
 from attrdict import AttrDict
 
 # These are the tokens that we're allowed to use.
