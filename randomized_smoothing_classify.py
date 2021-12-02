@@ -108,6 +108,7 @@ def main():
             test_audio_path = line.split(',')[0].strip()
             test_audio_path = os.path.join(args.input_folder, "adv_"+test_audio_path)
             transcripts.append(line.split(',')[-2].strip())
+            saver = tf.train.Saver()
             with tf.Session() as sess:
                 # if args.input.split(".")[-1] == 'mp3':
                 if test_audio_path.split(".")[-1] == 'mp3':
@@ -128,7 +129,6 @@ def main():
                 with tf.variable_scope("", reuse=tf.AUTO_REUSE):
                     logits = get_logits(new_input, lengths)
 
-                saver = tf.train.Saver()
                 saver.restore(sess, args.restore_path)
 
                 decoded, _ = tf.nn.ctc_beam_search_decoder(logits, lengths, merge_repeated=False, beam_width=500)
