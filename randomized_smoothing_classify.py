@@ -148,7 +148,7 @@ def main():
 
             if args.smooth_type == 'mean':
                 print("Using smooth type mean")
-                new_logits_ls_np = np.zeros((args.batch_size, N))
+                new_logits_ls_np = np.zeros((logits.shape[0], args.sample_num, logits.shape[2]))
                 for i in range(int(args.sample_num/args.batch_size)):
                     print("sampled: "+str(i))
 
@@ -162,9 +162,9 @@ def main():
                     new_audio = np.clip(new_audio, -2**15, 2**15-1)
 
                     output_logits = sess.run((logits), {new_input: batch_audios, lengths: batch_lengths})
-                    new_logits_ls_np[i*args.batch_size:(i+1)*args.batch_size] = output_logits
+                    new_logits_ls_np[:,i*args.batch_size:(i+1)*args.batch_size,:] = output_logits
                 
-                logits_smooth = np.mean(new_logits_ls_np, axis=0)
+                logits_smooth = np.mean(new_logits_ls_np, axis=1)
                 final_logits_list.append(logits_smooth)
                 final_logits_holder = tf.placeholder(tf.float32, logits.shape)
                 final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
