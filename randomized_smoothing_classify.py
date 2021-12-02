@@ -127,7 +127,7 @@ def main():
                 lengths = tf.placeholder(tf.int32, [1])
 
                 with tf.variable_scope("", reuse=tf.AUTO_REUSE):
-                    logits = get_logits_smooth(new_input, lengths, args.smooth_sigma, args.sample_num, args.smooth_type)
+                    logits = get_logits(new_input, lengths)
 
                 saver = tf.train.Saver()
                 saver.restore(sess, args.restore_path)
@@ -137,9 +137,29 @@ def main():
                 print('logits shape', logits.shape)
                 length = (len(audio)-1)//320
                 l = len(audio)
-                final_logits, r = sess.run(logits, decoded, {new_input: [audio],
+
+                new_logits_ls = []
+                for _ in range(args.sample_num):
+                    noise = np.random.normal(0.0, args.smooth_sigma, size=tf.shape(audio))
+                    new_audio = audio + noise
+                    output_logits, _ = sess.run(logits, decoded, {new_input: [new_audio],
                                     lengths: [length]})
-                final_logits_list.append(final_logits)
+                    new_logits_ls.append(output_logits)
+                new_logits_ls_np = np.array(new_logits_ls)
+                if args.smooth_type == 'mean':
+                    logits_smooth = np.mean(new_logits_ls_np, axis=0)
+                elif args.smooth_type == 'median':
+                    logits_smooth = np.median(new_logits_ls_np, axis=0)
+                else:
+                    raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
+                
+                final_logits_list.append(logits_smooth)
+
+                # Run beam-search only
+                final_logits_holder = tf.placeholder(tf.float32, [1, N])
+                final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
+                r = sess.run(logits, decoded, {final_logits_holder: [logits_smooth],
+                                    lengths: [length]})
                 decoded_list.append(r)
 
     predictions = []
