@@ -230,8 +230,6 @@ def main():
 
                 curr_predictions = []
                 curr_list_decoded = []
-                output_decoded = np.zeros(decoded.shape)
-                print(decoded.shape)
 
                 for i in range(int(args.sample_num/args.batch_size)):
                     print("sampled batch: "+str(i))
@@ -246,17 +244,16 @@ def main():
                     batch_audios = np.clip(batch_audios, -2**15, 2**15-1)
 
                     _, output_decoded = sess.run((logits, decoded), {new_input: batch_audios, lengths: batch_lengths})
-                    new_logits_ls_np[i*args.batch_size:(i+1)*args.batch_size,:] = output_logits
+                    print(output_decoded.shape)
+                    curr_list_decoded.append(output_decoded)
+                    curr_predictions.append("".join([toks[x] for x in output_decoded[0].values]))
                 
-                logits_smooth = np.median(new_logits_ls_np, axis=1, keepdims=True)
-                final_logits_list.append(logits_smooth)
-                final_logits_holder = tf.placeholder(tf.float32, logits_smooth.shape)
-                final_length_holder = tf.placeholder(tf.int32, [1])
-                final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, final_length_holder, merge_repeated=False, beam_width=500)
-                r = sess.run((final_decoded), {final_logits_holder: logits_smooth, final_length_holder: [length]})
-                decoded_list.append(r)
                 sess.close()
-
+                c = Counter(curr_predictions)
+                print(c.items())
+                final_prediction = c.most_common(1)[0][0]
+                predictions.append(final_prediction)
+                ground_truths.append(transcripts[-1])
                 predictions.append("".join([toks[x] for x in r[0].values]))
                 ground_truths.append(transcripts[-1])
             else:
