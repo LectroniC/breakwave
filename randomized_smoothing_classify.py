@@ -211,23 +211,6 @@ def main():
                 raise Exception("Not implemented")
 
             elif args.smooth_type == 'vote_by_sentence':
-                # curr_predictions = []
-                # curr_list_decoded = []
-                # for i in range(args.sample_num):
-                #     print("sampled: "+str(i))
-                #     noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape) * max(np.abs(audio))
-                #     new_audio = audio + noise
-                #     new_audio = np.clip(new_audio, -2**15, 2**15-1)
-                #     _, output_decoded = sess.run((logits, decoded), {new_input: [new_audio], lengths: [length]})
-                #     curr_list_decoded.append(output_decoded)
-                #     curr_predictions.append("".join([toks[x] for x in output_decoded[0].values]))
-                # sess.close()
-                # c = Counter(curr_predictions)
-                # print(c.items())
-                # final_prediction = c.most_common(1)[0][0]
-                # predictions.append(final_prediction)
-                # ground_truths.append(transcripts[-1])
-
                 curr_predictions = []
                 curr_list_decoded = []
 
