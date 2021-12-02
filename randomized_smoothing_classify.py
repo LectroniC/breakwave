@@ -164,7 +164,7 @@ def main():
                     output_logits = sess.run((logits), {new_input: batch_audios, lengths: batch_lengths})
                     new_logits_ls_np[:,i*args.batch_size:(i+1)*args.batch_size,:] = output_logits
                 
-                logits_smooth = np.mean(new_logits_ls_np, axis=1)
+                logits_smooth = np.mean(new_logits_ls_np, axis=1, keepdims=True)
                 final_logits_list.append(logits_smooth)
                 final_logits_holder = tf.placeholder(tf.float32, logits.shape)
                 final_decoded, _ = tf.nn.ctc_beam_search_decoder(final_logits_holder, lengths, merge_repeated=False, beam_width=500)
