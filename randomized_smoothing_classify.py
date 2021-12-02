@@ -150,7 +150,7 @@ def main():
                 print("Using smooth type mean")
                 new_logits_ls_np = np.zeros((logits.shape[0], args.sample_num, logits.shape[2]))
                 for i in range(int(args.sample_num/args.batch_size)):
-                    print("sampled: "+str(i))
+                    print("sampled batch: "+str(i))
 
                     batch_audios = [audio]*args.batch_size
                     batch_lengths = [length]*args.batch_size
@@ -158,8 +158,8 @@ def main():
                     batch_lengths = np.array(batch_lengths)
                     
                     noise = np.random.normal(0.0, args.smooth_sigma, size=batch_audios.shape) * max(np.abs(audio))
-                    new_audio = audio + noise
-                    new_audio = np.clip(new_audio, -2**15, 2**15-1)
+                    batch_audios = batch_audios + noise
+                    batch_audios = np.clip(batch_audios, -2**15, 2**15-1)
 
                     output_logits = sess.run((logits), {new_input: batch_audios, lengths: batch_lengths})
                     new_logits_ls_np[:,i*args.batch_size:(i+1)*args.batch_size,:] = output_logits
