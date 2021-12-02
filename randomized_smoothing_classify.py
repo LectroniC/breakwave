@@ -94,6 +94,8 @@ def main():
                         required=True,
                         help='location for the folder of the wav files')
     args = parser.parse_args()
+    while len(sys.argv) > 1:
+        sys.argv.pop()
 
 
     decoded_list = []
