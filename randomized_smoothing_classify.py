@@ -141,7 +141,6 @@ def main():
             length = (len(audio)-1)//320
             l = len(audio)
 
-            
             if args.smooth_type == 'mean':
 
                 print("Using smooth type mean")
@@ -162,9 +161,14 @@ def main():
                 decoded_list.append(r)
                 sess.close()
 
-            elif args.smooth_type == 'median':
-                print("Using smooth type median")
-                # logits_smooth = np.median(new_logits_ls_np, axis=0)
+            elif args.smooth_type == 'vote_by_token':
+                print("Using smooth type vote_by_token")
+                raise Exception("Not implemented")
+            elif args.smooth_type == 'vote_by_word':
+                print("Using smooth vote_by_word")
+                raise Exception("Not implemented")
+            elif args.smooth_type == 'vote_by_sentence':
+                print("Using smooth vote_by_sentence")
                 raise Exception("Not implemented")
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
