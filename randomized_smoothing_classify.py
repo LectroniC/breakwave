@@ -104,7 +104,7 @@ def main():
         lines = file.readlines()
         for line in lines:
             test_audio_path = line.split(',')[0].strip()
-            test_audio_path = os.path.join(args.input_folder, test_audio_path)
+            test_audio_path = os.path.join(args.input_folder, "adv_"+test_audio_path)
             transcripts.append(line.split(',')[-2].strip())
             with tf.Session() as sess:
                 # if args.input.split(".")[-1] == 'mp3':
