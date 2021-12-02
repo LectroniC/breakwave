@@ -75,7 +75,6 @@ def calculate_report(labels, decodings, distances):
 
     return samples_wer, samples
 
-
 def main():
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('--restore_path', type=str,
@@ -89,17 +88,13 @@ def main():
                         help="sample number of randomized smoothing")
     parser.add_argument('--smooth_type', type=str,
                         required=True,
-                        help="smoothing type: mean, median, vote_by_sentence")
+                        help="smoothing type: mean, median, majority")
     parser.add_argument('--labels_csv', type=str,
                         required=True,
                         help='location for labels.csv')
     parser.add_argument('--input_folder', type=str,
                         required=True,
                         help='location for the folder of the wav files')
-    parser.add_argument('--batch_size', type=int, default = 8,
-                        required=False,
-                        help='location for the folder of the wav files')
-    
     args = parser.parse_args()
     while len(sys.argv) > 1:
         sys.argv.pop()
@@ -121,9 +116,12 @@ def main():
             test_audio_path = os.path.join(args.input_folder, "adv_"+test_audio_path)
             transcripts.append(line.split(',')[-2].strip())
 
+            # if args.input.split(".")[-1] == 'mp3':
             if test_audio_path.split(".")[-1] == 'mp3':
+                # raw = pydub.AudioSegment.from_mp3(args.input)
                 raw = pydub.AudioSegment.from_mp3(test_audio_path)
                 audio = np.array([struct.unpack("<h", raw.raw_data[i:i+2])[0] for i in range(0,len(raw.raw_data),2)])
+            # elif args.input.split(".")[-1] == 'wav':
             elif test_audio_path.split(".")[-1] == 'wav':
                 _, audio = wav.read(test_audio_path)
             else:
@@ -131,8 +129,8 @@ def main():
             N = len(audio)
             print(audio.shape)
             np.set_printoptions(threshold=sys.maxsize)
-            new_input = tf.placeholder(tf.float32, [args.batch_size, N])
-            lengths = tf.placeholder(tf.int32, [args.batch_size])
+            new_input = tf.placeholder(tf.float32, [1, N])
+            lengths = tf.placeholder(tf.int32, [1])
 
             with tf.variable_scope("", reuse=tf.AUTO_REUSE):
                 logits = get_logits(new_input, lengths)
@@ -147,23 +145,16 @@ def main():
             l = len(audio)
 
             if args.smooth_type == 'mean':
+
                 print("Using smooth type mean")
                 new_logits_ls = []
-                for i in range(args.sample_num/args.batch_size):
+                for i in range(args.sample_num):
                     print("sampled: "+str(i))
-                    batch_audios = []
-                    batch_lengths = []
-                    for j in range(args.batchs_size):
-                        noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape) * max(np.abs(audio))
-                        new_audio = audio + noise
-                        new_audio = np.clip(new_audio, -2**15, 2**15-1)
-                        batch_audios.append(new_audio)
-                        batch_lengths.append(length)
-                    batch_audios = np.array(batch_audios)
-                    batch_lengths = np.array(batch_lengths)
-                    output_logits = sess.run((logits), {new_input: batch_audios, lengths: batch_lengths})
-                    new_logits_ls.extend(output_logits.tolist())
-                
+                    noise = np.random.normal(0.0, args.smooth_sigma, size=audio.shape) * max(np.abs(audio))
+                    new_audio = audio + noise
+                    new_audio = np.clip(new_audio, -2**15, 2**15-1)
+                    output_logits = sess.run((logits), {new_input: [new_audio], lengths: [length]})
+                    new_logits_ls.append(output_logits)
                 new_logits_ls_np = np.array(new_logits_ls)
                 logits_smooth = np.mean(new_logits_ls_np, axis=0)
                 final_logits_list.append(logits_smooth)
@@ -175,15 +166,10 @@ def main():
 
                 predictions.append("".join([toks[x] for x in r[0].values]))
                 ground_truths.append(transcripts[-1])
-            
-            if args.smooth_type == 'median':
-                print("Using smooth type median")
-                raise Exception("Not implemented")
-    
+
             elif args.smooth_type == 'vote_by_token':
                 print("Using smooth type vote_by_token")
                 raise Exception("Not implemented")
-
             elif args.smooth_type == 'vote_by_sentence':
                 curr_predictions = []
                 curr_list_decoded = []
