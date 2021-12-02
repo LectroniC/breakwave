@@ -103,9 +103,9 @@ def main():
     with open(args.labels_csv,'r') as file:
         lines = file.readlines()
         for line in lines:
-            test_audio_path = lines.split(',')[0].strip()
+            test_audio_path = line.split(',')[0].strip()
             test_audio_path = os.path.join(args.input_folder, test_audio_path)
-            transcripts.append(lines.split(',')[-2].strip())
+            transcripts.append(line.split(',')[-2].strip())
             with tf.Session() as sess:
                 # if args.input.split(".")[-1] == 'mp3':
                 if test_audio_path.split(".")[-1] == 'mp3':
