@@ -75,7 +75,6 @@ def calculate_report(labels, decodings, distances):
 
     return samples_wer, samples
 
-
 def main():
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('--restore_path', type=str,
@@ -138,6 +137,9 @@ def main():
             lengths = tf.placeholder(tf.int32, [1])
             with tf.variable_scope("", reuse=tf.AUTO_REUSE):
                 logits = get_logits(new_input, lengths)
+            
+            saver = tf.train.Saver()
+            saver.restore(sess, args.restore_path)
             
             length = (len(audio)-1)//320
             l = len(audio)
