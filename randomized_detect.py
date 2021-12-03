@@ -275,7 +275,6 @@ def main():
                 
                 sess.close()
                 c = Counter(curr_predictions)
-                print(c.items())
                 final_prediction = c.most_common(1)[0][0]
                 random_pass_predictions.append(final_prediction)
                 ground_truths.append(transcripts[-1])
@@ -295,9 +294,12 @@ def main():
 
     file_content += "\n".join(ground_truths)
     file_content += '\n'
+    file_content += '\n'
     file_content += "\n".join(first_pass_predictions)
     file_content += '\n'
+    file_content += '\n'
     file_content += "\n".join(random_pass_predictions)
+    file_content += '\n'
     file_content += '\n'
 
     distances = [levenshtein(a, b) for a, b in zip(first_pass_predictions, random_pass_predictions)]
