@@ -100,7 +100,10 @@ def main():
                         help='location for the folder of the wav files')
     parser.add_argument('--is-benign', default = False, action="store_true",
                         required=False,
-                        help='location for the folder of the wav files')
+                        help='is the folder a benign format')
+    parser.add_argument('--to-file',  type=str,
+                        required=False,
+                        help='should we write to a file')
     
     args = parser.parse_args()
     while len(sys.argv) > 1:
@@ -113,7 +116,8 @@ def main():
     ground_truths = []
     first_pass_predictions = []
     random_pass_predictions = []
-    
+
+    file_content = ""
 
     with open(args.labels_csv,'r') as file:
         lines = file.readlines()
@@ -278,6 +282,12 @@ def main():
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
             
+            distances = [levenshtein(first_pass_predictions[-1], random_pass_predictions[-1])]
+            wer, samples = calculate_report(first_pass_predictions, random_pass_predictions, distances)
+            mean_edit_distance = np.mean(distances)
+            print('Test - WER: %f, CER: %f' % (wer, mean_edit_distance))
+            file_content += 'Test - WER: %f, CER: %f' % (wer, mean_edit_distance)
+            file_content += '\n'
 
     print(ground_truths)
     print(first_pass_predictions)
@@ -287,5 +297,12 @@ def main():
     wer, samples = calculate_report(first_pass_predictions, random_pass_predictions, distances)
     mean_edit_distance = np.mean(distances)
     print('Test - WER: %f, CER: %f' % (wer, mean_edit_distance))
+    file_content += 'total: \n'
+    file_content += 'Test - WER: %f, CER: %f' % (wer, mean_edit_distance)
+    file_content += '\n'
+
+    if args.to_file is not None:
+        with open(args.to_file,'w') as file:
+            file.write(file_content)
 
 main()
