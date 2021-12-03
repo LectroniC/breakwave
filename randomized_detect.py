@@ -283,7 +283,7 @@ def main():
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
             
             distances = [levenshtein(first_pass_predictions[-1], random_pass_predictions[-1])]
-            wer, samples = calculate_report(first_pass_predictions, random_pass_predictions, distances)
+            wer, samples = calculate_report([first_pass_predictions[-1]], [random_pass_predictions[-1]], distances)
             mean_edit_distance = np.mean(distances)
             print('Test - WER: %f, CER: %f' % (wer, mean_edit_distance))
             file_content += 'Test - WER: %f, CER: %f' % (wer, mean_edit_distance)
