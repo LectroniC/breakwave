@@ -99,6 +99,12 @@ def main():
     parser.add_argument('--batch_size', type=int, default = 8,
                         required=False,
                         help='location for the folder of the wav files')
+    parser.add_argument('--is-benign', default = False, action="store_true",
+                        required=False,
+                        help='is the folder a benign format')
+    parser.add_argument('--to-file',  type=str,
+                        required=False,
+                        help='should we write to a file')
     
     args = parser.parse_args()
     while len(sys.argv) > 1:
@@ -110,7 +116,7 @@ def main():
     transcripts = []
     ground_truths = []
     predictions = []
-    
+    file_content = ''
 
     with open(args.labels_csv,'r') as file:
         lines = file.readlines()
@@ -118,7 +124,10 @@ def main():
             tf.reset_default_graph()
             sess = tf.InteractiveSession()
             test_audio_path = line.split(',')[0].strip()
-            test_audio_path = os.path.join(args.input_folder, "adv_"+test_audio_path)
+            if not args.is_benign:
+                test_audio_path = os.path.join(args.input_folder, "adv_"+test_audio_path)
+            else:
+                test_audio_path = os.path.join(args.input_folder, test_audio_path)
             transcripts.append(line.split(',')[-2].strip())
 
             if test_audio_path.split(".")[-1] == 'mp3':
@@ -249,6 +258,14 @@ def main():
             else:
                 raise Exception("No implementation of this type of smoothing, please choose from mean, median, majority")
             
+            distances = [levenshtein(ground_truths[-1], predictions[-1])]
+            wer, samples = calculate_report([ground_truths[-1]], [predictions[-1]], distances)
+            mean_edit_distance = np.mean(distances)
+            print('Test - WER: %f, CER: %f' % (wer, mean_edit_distance))
+            file_content += 'Test - WER: %f, CER: %f' % (wer, mean_edit_distance)
+            file_content += '\n'
+
+            
 
     print(ground_truths)
     print(predictions)
@@ -257,5 +274,9 @@ def main():
     mean_edit_distance = np.mean(distances)
     print('Test - WER: %f, CER: %f' %
           (wer, mean_edit_distance))
+    
+    if args.to_file is not None:
+        with open(args.to_file,'w') as file:
+            file.write(file_content)
 
 main()
