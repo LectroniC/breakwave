@@ -98,6 +98,9 @@ def main():
     parser.add_argument('--batch_size', type=int, default = 8,
                         required=False,
                         help='location for the folder of the wav files')
+    parser.add_argument('--is-benign', default = False, action="store_true",
+                        required=False,
+                        help='location for the folder of the wav files')
     
     args = parser.parse_args()
     while len(sys.argv) > 1:
@@ -118,7 +121,10 @@ def main():
             tf.reset_default_graph()
             sess = tf.InteractiveSession()
             test_audio_path = line.split(',')[0].strip()
-            test_audio_path = os.path.join(args.input_folder, "adv_"+test_audio_path)
+            if not args.is_benign:
+                test_audio_path = os.path.join(args.input_folder, "adv_"+test_audio_path)
+            else:
+                test_audio_path = os.path.join(args.input_folder, test_audio_path)
             transcripts.append(line.split(',')[-2].strip())
 
             if test_audio_path.split(".")[-1] == 'mp3':
