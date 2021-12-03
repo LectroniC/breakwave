@@ -282,6 +282,10 @@ def main():
     print('Test - WER: %f, CER: %f' %
           (wer, mean_edit_distance))
     
+    file_content += 'total: \n'
+    file_content += 'Test - WER: %f, CER: %f' % (wer, mean_edit_distance)
+    file_content += '\n'
+    
     if args.to_file is not None:
         with open(args.to_file,'w') as file:
             file.write(file_content)
