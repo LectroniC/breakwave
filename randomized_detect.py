@@ -293,6 +293,13 @@ def main():
     print(first_pass_predictions)
     print(random_pass_predictions)
 
+    file_content += "\n".join(ground_truths)
+    file_content += '\n'
+    file_content += "\n".join(first_pass_predictions)
+    file_content += '\n'
+    file_content += "\n".join(random_pass_predictions)
+    file_content += '\n'
+
     distances = [levenshtein(a, b) for a, b in zip(first_pass_predictions, random_pass_predictions)]
     wer, samples = calculate_report(first_pass_predictions, random_pass_predictions, distances)
     mean_edit_distance = np.mean(distances)

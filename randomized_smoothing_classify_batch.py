@@ -269,6 +269,12 @@ def main():
 
     print(ground_truths)
     print(predictions)
+
+    file_content += "\n".join(ground_truths)
+    file_content += '\n'
+    file_content += "\n".join(predictions)
+    file_content += '\n'
+
     distances = [levenshtein(a, b) for a, b in zip(ground_truths, predictions)]
     wer, samples = calculate_report(ground_truths, predictions, distances)
     mean_edit_distance = np.mean(distances)
