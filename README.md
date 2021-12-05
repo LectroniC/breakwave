@@ -38,3 +38,6 @@ example_audios downloaded from the [Audio Examples](https://waveguard.herokuapp.
 
 Choose `defender_hp=80` since this is the choice from the paper.
 
+# Contact
+
+[Licheng Luo](ll6@illinois.edu) 
