@@ -38,6 +38,12 @@ example_audios downloaded from the [Audio Examples](https://waveguard.herokuapp.
 
 Choose `defender_hp=80` since this is the choice from the paper.
 
+# Acknowledgement
+Some code are borrowed from the following repo:
+
+- [WaveGuard](https://github.com/shehzeen/waveguard_defense)
+- [Audio CW attack](https://github.com/carlini/)
+
 # Contact
 
 [Licheng Luo](ll6@illinois.edu) 
